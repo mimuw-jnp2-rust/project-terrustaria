@@ -1,24 +1,37 @@
-# Frobnicator (this is a template)
+# Terrustaria
 
 ## Authors
-- Andrzej Głuszak (@agluszak on GitHub)
-- Linus Torvalds (@torvalds on GitHub)
+- Tomasz Głąb (@Toomimi on GitHub)
+- Jan Kwiatkowski (@jk-89 on GitHub)
 
 ## Description
-Frobnicator is going to be a platformer game similar to Super Mario Bros made using Bevy game engine.
+Terrustaria is going to be a simplified Rust implementation of well known game - Terraria.
 
 ## Features
-- map generator
-- shooting
-- enemy AI
-- game state saving and loading
-- scores
+- generating unique world maps
+- moving and mining
+- collecting items in equipment
+- crafting new items
+- building new structures
+- different types of blocks (water, coal, copper etc.)
+- optional - combat system
 
 ## Plan
-In the first part we're going to implement the basics: movement, physics and shooting. The enemies will simply bounce from one edge of the platform to the other. There will be only a single map.
+First part:
+- creating block types
+- generating world maps
+- adding a player and an option to move
+- player is able to mine now
 
-In the second part we're going to add random map generator, saving/loading, scores and a more sophisticated AI.
+Second part:
+- saving and loading a game
+- main menu
+- adding and removing items from the equipment
+- building new structures from collected items
+- crafting new items from collected ones
+- combat system (optional)
 
 ## Libraries
 - Bevy
-- Serde (for serialization)
+- bevy_ecs_tilemap library (https://github.com/StarArawn/bevy_ecs_tilemap)
+- Serde for serialization.
