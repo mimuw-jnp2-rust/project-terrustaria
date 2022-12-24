@@ -1,8 +1,24 @@
 use bevy::{math::Vec3Swizzles, prelude::*, time::FixedTimestep};
 use bevy_ecs_tilemap::prelude::*;
 
-const TIME_STEP: f32 = 1.0 / 60.0;
-const BOUNDS: Vec2 = Vec2::new(1200.0, 640.0);
+mod map;
+use map::{spawn_background, spawn_map, spawn_wall_map};
+
+mod constants;
+use constants::{BOUNDS, TIME_STEP, Z_FOREGROUND};
+
+mod debug_helpers;
+use debug_helpers::camera_debug_movement;
+
+// Can be called with (x,y) transforming to (x,y,Z_FRGRND) or empty transforming to (0,0,Z_FRGRND)
+macro_rules! bring_to_foreground {
+    ($x:expr, $y:expr) => {
+        Transform::from_xyz($x, $y, Z_FOREGROUND)
+    };
+    () => {
+        Transform::from_xyz(0., 0., Z_FOREGROUND)
+    };
+}
 
 fn main() {
     App::new()
@@ -20,8 +36,11 @@ fn main() {
                 .set(ImagePlugin::default_nearest()),
         )
         .add_plugin(TilemapPlugin)
+        .add_startup_system(spawn_background)
+        .add_startup_system(spawn_wall_map)
         .add_startup_system(spawn_map)
         .add_startup_system(setup)
+        .add_system(camera_debug_movement)
         .add_system_set(
             SystemSet::new()
                 .with_run_criteria(FixedTimestep::step(TIME_STEP as f64))
@@ -57,13 +76,7 @@ struct RotateToPlayer {
 // `Z` axis goes from far to near (`+Z` points towards you, out of the screen)
 // The origin is at the center of the screen.
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    let background: Handle<Image> = asset_server.load("background.png");
-
-    // spawn background
-    // commands.spawn(SpriteBundle {
-    //     texture: background,
-    //     ..Default::default()
-    // });
+    commands.spawn(Camera2dBundle::default());
 
     let ship_handle = asset_server.load("textures/simplespace/ship_C.png");
     let enemy_a_handle = asset_server.load("textures/simplespace/enemy_A.png");
@@ -75,6 +88,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn((
         SpriteBundle {
             texture: ship_handle,
+            transform: bring_to_foreground!(0., 50.),
             ..default()
         },
         Player {
@@ -87,7 +101,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn((
         SpriteBundle {
             texture: enemy_a_handle.clone(),
-            transform: Transform::from_xyz(0.0 - horizontal_margin, 0.0, 0.0),
+            transform: bring_to_foreground!(-horizontal_margin, 0.),
             ..default()
         },
         SnapToPlayer,
@@ -97,7 +111,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn((
         SpriteBundle {
             texture: enemy_b_handle.clone(),
-            transform: Transform::from_xyz(0.0 + horizontal_margin, 0.0, 0.0),
+            transform: bring_to_foreground!(horizontal_margin, 0.),
             ..default()
         },
         RotateToPlayer {
@@ -145,7 +159,7 @@ fn player_movement_system(
     transform.translation += translation_delta;
 
     // bound the ship within the invisible level bounds
-    let extents = Vec3::from((BOUNDS / 2.0, 0.0));
+    let extents = Vec3::from((BOUNDS / 2.0, Z_FOREGROUND));
     transform.translation = transform.translation.min(extents).max(-extents);
 }
 
@@ -207,81 +221,5 @@ fn rotate_to_player_system(
 
         // rotate the enemy to face the player
         enemy_transform.rotate_z(rotation_angle);
-    }
-}
-
-fn transform_map(
-    size: &TilemapSize,
-    grid_size: &TilemapGridSize,
-    map_type: &TilemapType,
-    z: f32,
-) -> Transform {
-    let low = TilePos::new(0, 0).center_in_world(grid_size, map_type);
-    let high = TilePos::new(size.x - 1, size.y - 1).center_in_world(grid_size, map_type);
-
-    let diff = high - low;
-
-    Transform::from_xyz(-diff.x / 2., -diff.y, z)
-}
-
-//Spawn map entity
-fn spawn_map(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,
-    #[cfg(all(not(feature = "atlas"), feature = "render"))] array_texture_loader: Res<
-        ArrayTextureLoader,
-    >,
-) {
-    commands.spawn(Camera2dBundle::default());
-
-    let texture_handle: Handle<Image> = asset_server.load("tiles.png");
-
-    let map_size = TilemapSize { x: 32, y: 32 };
-
-    let tilemap_entity = commands.spawn_empty().id();
-
-    let mut tile_storage = TileStorage::empty(map_size);
-
-    // Spawn the elements of the tilemap.
-    // Alternatively, you can use helpers::filling::fill_tilemap.
-    for x in 0..map_size.x {
-        for y in 0..map_size.y {
-            let tile_pos = TilePos { x, y };
-            let tile_entity = commands
-                .spawn(TileBundle {
-                    position: tile_pos,
-                    tilemap_id: TilemapId(tilemap_entity),
-                    ..Default::default()
-                })
-                .id();
-            tile_storage.set(&tile_pos, tile_entity);
-        }
-    }
-
-    let tile_size = TilemapTileSize { x: 16.0, y: 16.0 };
-    let grid_size = tile_size.into();
-    let map_type = TilemapType::default();
-
-    commands.entity(tilemap_entity).insert(TilemapBundle {
-        grid_size,
-        map_type,
-        size: map_size,
-        storage: tile_storage,
-        texture: TilemapTexture::Single(texture_handle),
-        tile_size,
-        // transform: Transform::from_xyz(-(map_size.x as f32)/2.0, -(map_size.y as f32), 0.0),
-        transform: transform_map(&map_size, &grid_size, &map_type, 0.0),
-        ..Default::default()
-    });
-
-    // Add atlas to array texture loader so it's preprocessed before we need to use it.
-    // Only used when the atlas feature is off and we are using array textures.
-    #[cfg(all(not(feature = "atlas"), feature = "render"))]
-    {
-        array_texture_loader.add(TilemapArrayTexture {
-            texture: TilemapTexture::Single(asset_server.load("tiles.png")),
-            tile_size,
-            ..Default::default()
-        });
     }
 }
