@@ -1,13 +1,17 @@
 use bevy::{math::Vec3Swizzles, prelude::*, time::FixedTimestep};
 use bevy_ecs_tilemap::prelude::*;
+use bevy_rapier2d::prelude::*;
 
 mod map;
+
 use map::{spawn_background, spawn_map, spawn_wall_map};
 
 mod constants;
+
 use constants::{BOUNDS, TIME_STEP, Z_FOREGROUND};
 
 mod debug_helpers;
+
 use debug_helpers::camera_debug_movement;
 
 // Can be called with (x,y) transforming to (x,y,Z_FRGRND) or empty transforming to (0,0,Z_FRGRND)
@@ -36,10 +40,13 @@ fn main() {
                 .set(ImagePlugin::default_nearest()),
         )
         .add_plugin(TilemapPlugin)
+        .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
         .add_startup_system(spawn_background)
         .add_startup_system(spawn_wall_map)
         .add_startup_system(spawn_map)
-        .add_startup_system(setup)
+        .add_startup_system(spawn_player)
+        .add_startup_system(spawn_enemies)
+        .add_startup_system(setup_camera)
         .add_system(camera_debug_movement)
         .add_system_set(
             SystemSet::new()
@@ -71,54 +78,67 @@ struct RotateToPlayer {
     rotation_speed: f32,
 }
 
-// `X` axis goes from left to right (`+X` points right)
-// `Y` axis goes from bottom to top (`+Y` point up)
-// `Z` axis goes from far to near (`+Z` points towards you, out of the screen)
-// The origin is at the center of the screen.
-fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    commands.spawn(Camera2dBundle::default());
 
+fn spawn_player(mut commands: Commands, asset_server: Res<AssetServer>) {
     let ship_handle = asset_server.load("textures/simplespace/ship_C.png");
+
+    commands
+        .spawn((
+            SpriteBundle {
+                texture: ship_handle.clone(),
+                transform: bring_to_foreground!(0., 50.),
+                ..default()
+            },
+            Player {
+                movement_speed: 500.0,                  // metres per second
+                rotation_speed: f32::to_radians(180.0), // degrees per second
+            }
+        ))
+        .insert(RigidBody::Dynamic)
+        .insert(Collider::ball(0.5));
+}
+
+
+fn spawn_enemies(mut commands: Commands, asset_server: Res<AssetServer>) {
     let enemy_a_handle = asset_server.load("textures/simplespace/enemy_A.png");
     let enemy_b_handle = asset_server.load("textures/simplespace/enemy_B.png");
 
     let horizontal_margin = BOUNDS.x / 4.0;
 
-    // player controlled ship
-    commands.spawn((
-        SpriteBundle {
-            texture: ship_handle,
-            transform: bring_to_foreground!(0., 50.),
-            ..default()
-        },
-        Player {
-            movement_speed: 500.0,                  // metres per second
-            rotation_speed: f32::to_radians(360.0), // degrees per second
-        },
-    ));
-
     // enemy that snaps to face the player spawns on the left
-    commands.spawn((
-        SpriteBundle {
-            texture: enemy_a_handle.clone(),
-            transform: bring_to_foreground!(-horizontal_margin, 0.),
-            ..default()
-        },
-        SnapToPlayer,
-    ));
+    commands
+        .spawn((
+            SpriteBundle {
+                texture: enemy_a_handle.clone(),
+                transform: bring_to_foreground!(-horizontal_margin, 0.),
+                ..default()
+            },
+            SnapToPlayer,
+        ))
+        .insert(RigidBody::Fixed)
+        .insert(Collider::ball(0.5));
 
     // enemy that rotates to face the player enemy spawns on the right
-    commands.spawn((
-        SpriteBundle {
-            texture: enemy_b_handle.clone(),
-            transform: bring_to_foreground!(horizontal_margin, 0.),
-            ..default()
-        },
-        RotateToPlayer {
-            rotation_speed: f32::to_radians(45.0), // degrees per second
-        },
-    ));
+    commands
+        .spawn((
+            SpriteBundle {
+                texture: enemy_b_handle.clone(),
+                transform: bring_to_foreground!(horizontal_margin, 0.),
+                ..default()
+            },
+            RotateToPlayer {
+                rotation_speed: f32::to_radians(45.0), // degrees per second
+            },
+        ))
+        .insert(RigidBody::Fixed)
+        .insert(Collider::ball(0.5));
 }
+
+
+fn setup_camera(mut commands: Commands) {
+    commands.spawn(Camera2dBundle::default());
+}
+
 
 // Demonstrates applying rotation and movement based on keyboard input.
 fn player_movement_system(
