@@ -3,15 +3,12 @@ use bevy_ecs_tilemap::prelude::*;
 use bevy_rapier2d::prelude::*;
 
 mod map;
-
 use map::{spawn_background, spawn_map, spawn_wall_map};
 
 mod constants;
-
 use constants::{BOUNDS, TIME_STEP, Z_FOREGROUND};
 
 mod debug_helpers;
-
 use debug_helpers::camera_debug_movement;
 
 // Can be called with (x,y) transforming to (x,y,Z_FRGRND) or empty transforming to (0,0,Z_FRGRND)
@@ -23,6 +20,10 @@ macro_rules! bring_to_foreground {
         Transform::from_xyz(0., 0., Z_FOREGROUND)
     };
 }
+
+use bevy::prelude::*;
+use bevy_rapier2d::prelude::*;
+
 
 fn main() {
     App::new()
@@ -40,12 +41,14 @@ fn main() {
                 .set(ImagePlugin::default_nearest()),
         )
         .add_plugin(TilemapPlugin)
-        .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
+        .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(300.))
+        .add_plugin(RapierDebugRenderPlugin::default())
         .add_startup_system(spawn_background)
         .add_startup_system(spawn_wall_map)
-        .add_startup_system(spawn_map)
+        // .add_startup_system(spawn_map)
         .add_startup_system(spawn_player)
         .add_startup_system(spawn_enemies)
+        .add_startup_system(spawn_big_box_colider)
         .add_startup_system(setup_camera)
         .add_system(camera_debug_movement)
         .add_system_set(
@@ -80,13 +83,13 @@ struct RotateToPlayer {
 
 
 fn spawn_player(mut commands: Commands, asset_server: Res<AssetServer>) {
-    let ship_handle = asset_server.load("textures/simplespace/ship_C.png");
+    let ship_handle: Handle<Image> = asset_server.load("textures/simplespace/ship_C.png");
 
     commands
         .spawn((
             SpriteBundle {
-                texture: ship_handle.clone(),
-                transform: bring_to_foreground!(0., 50.),
+                texture: ship_handle,
+                // transform: bring_to_foreground!(0., 50.),
                 ..default()
             },
             Player {
@@ -95,7 +98,9 @@ fn spawn_player(mut commands: Commands, asset_server: Res<AssetServer>) {
             }
         ))
         .insert(RigidBody::Dynamic)
-        .insert(Collider::ball(0.5));
+        .insert(Collider::ball(10.))
+        .insert(GravityScale(0.))
+        .insert(TransformBundle::from(bring_to_foreground!(0., 50.)));
 }
 
 
@@ -109,21 +114,21 @@ fn spawn_enemies(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands
         .spawn((
             SpriteBundle {
-                texture: enemy_a_handle.clone(),
-                transform: bring_to_foreground!(-horizontal_margin, 0.),
+                texture: enemy_a_handle,
                 ..default()
             },
             SnapToPlayer,
         ))
         .insert(RigidBody::Fixed)
-        .insert(Collider::ball(0.5));
+        .insert(Collider::cuboid(10., 10.))
+        .insert(TransformBundle::from(bring_to_foreground!(-horizontal_margin, 0.)));
 
     // enemy that rotates to face the player enemy spawns on the right
     commands
         .spawn((
             SpriteBundle {
-                texture: enemy_b_handle.clone(),
-                transform: bring_to_foreground!(horizontal_margin, 0.),
+                texture: enemy_b_handle,
+                // transform: bring_to_foreground!(horizontal_margin, 0.),
                 ..default()
             },
             RotateToPlayer {
@@ -131,9 +136,19 @@ fn spawn_enemies(mut commands: Commands, asset_server: Res<AssetServer>) {
             },
         ))
         .insert(RigidBody::Fixed)
-        .insert(Collider::ball(0.5));
+        .insert(Collider::cuboid(10., 10.)).insert(TransformBundle::from(bring_to_foreground!(horizontal_margin, 0.)));
 }
 
+fn spawn_big_box_colider(mut commands: Commands) {
+    #[derive(Component)]
+    struct XD;
+    commands
+        .spawn((XD,
+            Collider::cuboid( 500., 100.),
+        ))
+        .insert(RigidBody::Fixed)
+        .insert(TransformBundle::from(bring_to_foreground!(0., -200.)));
+}
 
 fn setup_camera(mut commands: Commands) {
     commands.spawn(Camera2dBundle::default());
