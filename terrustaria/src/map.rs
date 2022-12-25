@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
+use bevy_rapier2d::prelude::*;
 
 use crate::constants::*;
 
@@ -47,6 +48,13 @@ fn fill_tilemap_without_building_area(
                     ..Default::default()
                 })
                 .insert(Name::new(format!("{map_name}Tile({x},{y})")))
+                .insert(RigidBody::Fixed)
+                .insert(Collider::cuboid(16., 16.))
+                .insert(TransformBundle::from(Transform::from_xyz(
+                    (x * 16) as f32,
+                    (y * 16) as f32,
+                    0.,
+                )))
                 .id();
             tile_storage.set(&tile_pos, tile_entity);
         }
