@@ -1,5 +1,7 @@
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
+use bevy_rapier2d::prelude::*;
+use bevy_ecs_tilemap::helpers::square_grid::neighbors::Neighbors;
 
 use crate::constants::*;
 
@@ -39,12 +41,22 @@ fn fill_tilemap_without_building_area(
             let tile_pos = TilePos { x, y };
 
             let tile_entity = commands
-                .spawn(TileBundle {
-                    position: tile_pos,
-                    tilemap_id,
-                    texture_index,
-                    ..Default::default()
-                })
+                .spawn((
+                    TileBundle {
+                        position: tile_pos,
+                        tilemap_id,
+                        texture_index,
+                        ..Default::default()
+                    }
+                ))
+                .insert(RigidBody::Fixed)
+                .insert(Collider::cuboid(16., 16.))
+                .insert(GravityScale(0.))
+                .insert(TransformBundle::from(Transform::from_xyz(
+                    (x * 16) as f32,
+                    (y * 16) as f32,
+                    0.,
+                )))
                 .id();
             tile_storage.set(&tile_pos, tile_entity);
         }
@@ -75,10 +87,9 @@ pub fn spawn_wall_map(mut commands: Commands, asset_server: Res<AssetServer>) {
         &mut tile_storage,
     );
 
-    let tile_size = TilemapTileSize { x: 16.0, y: 16.0 };
+    let tile_size = TilemapTileSize { x: TILE_SIZE, y: TILE_SIZE };
     let grid_size = tile_size.into();
     let map_type = TilemapType::default();
-
     commands.entity(tilemap_entity).insert(TilemapBundle {
         grid_size,
         map_type,
@@ -113,7 +124,7 @@ pub fn spawn_map(
         &mut tile_storage,
     );
 
-    let tile_size = TilemapTileSize { x: 16.0, y: 16.0 };
+    let tile_size = TilemapTileSize { x: TILE_SIZE, y: TILE_SIZE };
     let grid_size = tile_size.into();
     let map_type = TilemapType::default();
 

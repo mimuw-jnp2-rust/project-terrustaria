@@ -11,8 +11,9 @@ pub const TIME_STEP: f32 = 1.0 / 60.0;
 pub const BOUNDS: Vec2 = Vec2::new(1200.0, 640.0);
 
 // Map constants
-const MAP_WIDTH: u32 = 64;
-const MAP_DEPTH: u32 = 32;
+const MAP_WIDTH: u32 = 10;
+const MAP_DEPTH: u32 = 10;
+pub const TILE_SIZE: f32 = 16.0;
 pub const BUILDING_HEIGHT: u32 = 15;
 pub const MAP_SIZE: TilemapSize = TilemapSize {
     x: MAP_WIDTH,

@@ -44,11 +44,10 @@ fn main() {
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(300.))
         .add_plugin(RapierDebugRenderPlugin::default())
         .add_startup_system(spawn_background)
-        .add_startup_system(spawn_wall_map)
-        // .add_startup_system(spawn_map)
+        //.add_startup_system(spawn_wall_map)
+        .add_startup_system(spawn_map)
         .add_startup_system(spawn_player)
         .add_startup_system(spawn_enemies)
-        .add_startup_system(spawn_big_box_colider)
         .add_startup_system(setup_camera)
         .add_system(camera_debug_movement)
         .add_system_set(
@@ -137,17 +136,6 @@ fn spawn_enemies(mut commands: Commands, asset_server: Res<AssetServer>) {
         ))
         .insert(RigidBody::Fixed)
         .insert(Collider::cuboid(10., 10.)).insert(TransformBundle::from(bring_to_foreground!(horizontal_margin, 0.)));
-}
-
-fn spawn_big_box_colider(mut commands: Commands) {
-    #[derive(Component)]
-    struct XD;
-    commands
-        .spawn((XD,
-            Collider::cuboid( 500., 100.),
-        ))
-        .insert(RigidBody::Fixed)
-        .insert(TransformBundle::from(bring_to_foreground!(0., -200.)));
 }
 
 fn setup_camera(mut commands: Commands) {
