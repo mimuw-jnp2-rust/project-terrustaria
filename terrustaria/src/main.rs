@@ -1,9 +1,11 @@
 use bevy::{math::Vec3Swizzles, prelude::*, time::FixedTimestep};
 use bevy_ecs_tilemap::prelude::*;
 use bevy_rapier2d::prelude::*;
+use bevy_inspector_egui::WorldInspectorPlugin;
+
 
 mod map;
-use map::{spawn_background, spawn_map, spawn_wall_map};
+use map::{spawn_background, spawn_foreground_map, spawn_wall_map};
 
 mod constants;
 use constants::{BOUNDS, TIME_STEP, Z_FOREGROUND};
@@ -21,10 +23,6 @@ macro_rules! bring_to_foreground {
     };
 }
 
-use bevy::prelude::*;
-use bevy_rapier2d::prelude::*;
-
-
 fn main() {
     App::new()
         .add_plugins(
@@ -40,12 +38,13 @@ fn main() {
                 })
                 .set(ImagePlugin::default_nearest()),
         )
+        .add_plugin(WorldInspectorPlugin::new())
         .add_plugin(TilemapPlugin)
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(300.))
         .add_plugin(RapierDebugRenderPlugin::default())
         .add_startup_system(spawn_background)
         .add_startup_system(spawn_wall_map)
-        // .add_startup_system(spawn_map)
+        // .add_startup_system(spawn_foreground_map)
         .add_startup_system(spawn_player)
         .add_startup_system(spawn_enemies)
         .add_startup_system(spawn_big_box_colider)
@@ -97,6 +96,7 @@ fn spawn_player(mut commands: Commands, asset_server: Res<AssetServer>) {
                 rotation_speed: f32::to_radians(180.0), // degrees per second
             }
         ))
+        .insert(Name::new("Player"))
         .insert(RigidBody::Dynamic)
         .insert(Collider::ball(10.))
         .insert(GravityScale(0.))
@@ -119,9 +119,10 @@ fn spawn_enemies(mut commands: Commands, asset_server: Res<AssetServer>) {
             },
             SnapToPlayer,
         ))
+        .insert(Name::new("Enemy left"))
         .insert(RigidBody::Fixed)
         .insert(Collider::cuboid(10., 10.))
-        .insert(TransformBundle::from(bring_to_foreground!(-horizontal_margin, 0.)));
+        .insert(TransformBundle::from(bring_to_foreground!(-horizontal_margin, 100.)));
 
     // enemy that rotates to face the player enemy spawns on the right
     commands
@@ -135,8 +136,9 @@ fn spawn_enemies(mut commands: Commands, asset_server: Res<AssetServer>) {
                 rotation_speed: f32::to_radians(45.0), // degrees per second
             },
         ))
+        .insert(Name::new("Enemy right"))
         .insert(RigidBody::Fixed)
-        .insert(Collider::cuboid(10., 10.)).insert(TransformBundle::from(bring_to_foreground!(horizontal_margin, 0.)));
+        .insert(Collider::cuboid(10., 10.)).insert(TransformBundle::from(bring_to_foreground!(horizontal_margin, 100.)));
 }
 
 fn spawn_big_box_colider(mut commands: Commands) {
@@ -146,6 +148,7 @@ fn spawn_big_box_colider(mut commands: Commands) {
         .spawn((XD,
             Collider::cuboid( 500., 100.),
         ))
+        .insert(Name::new("BoxColider"))
         .insert(RigidBody::Fixed)
         .insert(TransformBundle::from(bring_to_foreground!(0., -200.)));
 }

@@ -33,6 +33,7 @@ fn fill_tilemap_without_building_area(
     tilemap_id: TilemapId,
     commands: &mut Commands,
     tile_storage: &mut TileStorage,
+    map_name: &str,
 ) {
     for x in 0..map_size.x {
         for y in 0..map_size.y - BUILDING_HEIGHT {
@@ -45,72 +46,29 @@ fn fill_tilemap_without_building_area(
                     texture_index,
                     ..Default::default()
                 })
+                .insert(Name::new(format!("{map_name}Tile({x},{y})")))
                 .id();
             tile_storage.set(&tile_pos, tile_entity);
         }
     }
 }
 
-pub fn spawn_background(mut commands: Commands, asset_server: Res<AssetServer>) {
-    let background: Handle<Image> = asset_server.load("background.png");
-
-    commands.spawn(SpriteBundle {
-        texture: background,
-        transform: Transform::from_xyz(0.0, 0.0, Z_BACKGROUND),
-        ..Default::default()
-    });
-}
-
-pub fn spawn_wall_map(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn spawn_map(mut commands: Commands, asset_server: Res<AssetServer>, texture_id: u32,  z_translation: f32, map_name: &str) {
     let texture_handle: Handle<Image> = asset_server.load("tiles.png");
 
     let mut tile_storage = TileStorage::empty(MAP_SIZE);
-    let tilemap_entity = commands.spawn_empty().id();
+    let tilemap_entity =
+        commands.spawn_empty()
+            .insert(Name::new(format!("{map_name}Map")))
+            .id();
 
     fill_tilemap_without_building_area(
-        TileTextureIndex(3),
+        TileTextureIndex(texture_id),
         MAP_SIZE,
         TilemapId(tilemap_entity),
         &mut commands,
         &mut tile_storage,
-    );
-
-    let tile_size = TilemapTileSize { x: 16.0, y: 16.0 };
-    let grid_size = tile_size.into();
-    let map_type = TilemapType::default();
-
-    commands.entity(tilemap_entity).insert(TilemapBundle {
-        grid_size,
-        map_type,
-        size: MAP_SIZE,
-        storage: tile_storage,
-        texture: TilemapTexture::Single(texture_handle.clone()),
-        tile_size,
-        transform: transform_map(&MAP_SIZE, &grid_size, &map_type, Z_WALLS),
-        ..Default::default()
-    });
-}
-
-//Spawn map entity
-pub fn spawn_map(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,
-    #[cfg(all(not(feature = "atlas"), feature = "render"))] array_texture_loader: Res<
-        ArrayTextureLoader,
-    >,
-) {
-    let texture_handle: Handle<Image> = asset_server.load("tiles.png");
-
-    let tilemap_entity = commands.spawn_empty().id();
-
-    let mut tile_storage = TileStorage::empty(MAP_SIZE);
-
-    fill_tilemap_without_building_area(
-        TileTextureIndex(0),
-        MAP_SIZE,
-        TilemapId(tilemap_entity),
-        &mut commands,
-        &mut tile_storage,
+        map_name
     );
 
     let tile_size = TilemapTileSize { x: 16.0, y: 16.0 };
@@ -124,18 +82,30 @@ pub fn spawn_map(
         storage: tile_storage,
         texture: TilemapTexture::Single(texture_handle),
         tile_size,
-        transform: transform_map(&MAP_SIZE, &grid_size, &map_type, Z_FOREGROUND),
+        transform: transform_map(&MAP_SIZE, &grid_size, &map_type, z_translation),
         ..Default::default()
     });
-
-    // Add atlas to array texture loader so it's preprocessed before we need to use it.
-    // Only used when the atlas feature is off and we are using array textures.
-    #[cfg(all(not(feature = "atlas"), feature = "render"))]
-    {
-        array_texture_loader.add(TilemapArrayTexture {
-            texture: TilemapTexture::Single(asset_server.load("tiles.png")),
-            tile_size,
-            ..Default::default()
-        });
-    }
 }
+
+pub fn spawn_background(mut commands: Commands, asset_server: Res<AssetServer>) {
+    let background: Handle<Image> = asset_server.load("background.png");
+
+    commands.spawn(SpriteBundle {
+        texture: background,
+        transform: Transform::from_xyz(0.0, 0.0, Z_BACKGROUND),
+        ..Default::default()
+    })
+    .insert(Name::new("Background"));
+}
+
+pub fn spawn_wall_map(commands: Commands,
+                             asset_server: Res<AssetServer>) {
+    spawn_map(commands, asset_server, 3, Z_WALLS, "Wall");
+}
+
+pub fn spawn_foreground_map(commands: Commands,
+                        asset_server: Res<AssetServer>) {
+    spawn_map(commands, asset_server, 0, Z_FOREGROUND, "Foreground");
+
+}
+
