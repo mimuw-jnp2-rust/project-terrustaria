@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-// A simple camera system for moving and zooming the camera
+// a simple camera system for moving and zooming the camera
 // to easily see what is the output of what we create deep down in the mine
 #[allow(dead_code)]
 pub fn camera_debug_movement(
@@ -41,13 +41,13 @@ pub fn camera_debug_movement(
 
         let z = transform.translation.z;
         transform.translation += time.delta_seconds() * direction * 500.;
-        // Important! We need to restore the Z values when moving the camera around.
-        // Bevy has a specific camera setup and this can mess with how our layers are shown.
+        // important: we need to restore the Z values when moving the camera around
+        // Bevy has a specific camera setup and this can mess with how our layers are shown
         transform.translation.z = z;
     }
 }
 
-// Can be called with (x,y) transforming to (x,y,Z_FRGRND) or empty transforming to (0,0,Z_FRGRND)
+// can be called with (x,y) transforming to (x,y,Z_FRGRND) or empty transforming to (0,0,Z_FRGRND)
 #[macro_export]
 macro_rules! bring_to_foreground {
     ($x:expr, $y:expr) => {

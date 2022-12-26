@@ -12,7 +12,7 @@ use crate::constants::*;
 //todo: Chunking?
 //todo: przesuwanie tła w momencie kiedy gracz się porusza/zapętlenie tła/zmiana na basic kolor
 
-//move top of the map to the middle of world space, takes into account building height
+// move top of the map to the middle of world space, takes into account building height
 fn transform_map(
     size: &TilemapSize,
     grid_size: &TilemapGridSize,

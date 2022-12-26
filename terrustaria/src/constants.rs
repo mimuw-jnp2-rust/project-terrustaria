@@ -1,22 +1,22 @@
 use bevy::math::{Vec2, Vec3};
 use bevy_ecs_tilemap::prelude::{TilemapGridSize, TilemapSize};
 
-// Depth of field constants
+// depth of field constants
 pub const Z_BACKGROUND: f32 = 0.;
 pub const Z_WALLS: f32 = 1.;
 pub const Z_FOREGROUND: f32 = 5.;
 
-// Movement constants
+// movement constants
 pub const TIME_STEP: f32 = 1.0 / 60.0;
 pub const BOUNDS: Vec2 = Vec2::new(1200.0, 640.0);
 
-// Player constants
+// player constants
 pub const PLAYER_POS: Vec2 = Vec2::new(100., 100.);
 
-// Camera constants
+// camera constants
 pub const CAMERA_POS: Vec3 = PLAYER_POS.extend(1000.);
 
-// Map constants
+// map constants
 const MAP_WIDTH: u32 = 32;
 const MAP_DEPTH: u32 = 16;
 pub const BUILDING_HEIGHT: u32 = 15;

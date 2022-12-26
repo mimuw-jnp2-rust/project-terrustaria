@@ -8,11 +8,9 @@ use crate::helpers::bring_to_foreground;
 
 use crate::player::Player;
 
-// snap to player ship behavior
 #[derive(Component)]
 pub struct SnapToPlayer;
 
-// rotate to face player ship behavior
 #[derive(Component)]
 pub struct RotateToPlayer {
     // rotation speed in radians per second
@@ -63,7 +61,7 @@ pub fn spawn_enemies(mut commands: Commands, asset_server: Res<AssetServer>) {
         )));
 }
 
-// Demonstrates snapping the enemy ship to face the player ship immediately.
+// snapping the enemy ship to face the player ship immediately
 pub fn snap_to_player(
     mut query: Query<&mut Transform, (With<SnapToPlayer>, Without<Player>)>,
     player_query: Query<&Transform, With<Player>>,
@@ -81,7 +79,7 @@ pub fn snap_to_player(
     }
 }
 
-// Demonstrates rotating an enemy ship to face the player ship at a given rotation speed.
+// rotating an enemy ship to face the player ship at a given rotation speed
 pub fn rotate_to_player(
     mut query: Query<(&RotateToPlayer, &mut Transform), Without<Player>>,
     player_query: Query<&Transform, With<Player>>,
