@@ -49,29 +49,24 @@ impl TileType {
 }
 
 fn init_tile_types() -> Vec<TileType> {
-    let mut tile_types = Vec::with_capacity(3);
-    tile_types.push(TileType::new(String::from("Grass"), 0.6,
-                                  TileTextureIndex(0), |x, y| true));
-    tile_types.push(TileType::new(String::from("Stone"), 0.3,
-                                  TileTextureIndex(3), |x, y| y < 5));
-    tile_types.push(TileType::new(String::from("Water"), 0.1,
-                                  TileTextureIndex(1), |x, y| y < 10 && x % 2 == 0));
-    return tile_types;
+     vec! [
+        TileType::new(String::from("Grass"), 0.6, TileTextureIndex(0), |_, _| true),
+        TileType::new(String::from("Stone"), 0.3, TileTextureIndex(3), |_, y| y < 5),
+        TileType::new(String::from("Water"), 0.1, TileTextureIndex(1), |x, y| y < 10 && x % 2 == 0),
+    ]
 }
 
-fn get_random_tile_type(tile_types: &Vec<TileType>) -> usize {
-    let mut rng = thread_rng();
-    let mut val: f32 = rng.gen();
-    for i in 0..tile_types.len() {
-        let prob = tile_types[i].occurrence_prob;
+fn get_random_tile_type(tile_types: &[TileType]) -> usize {
+    let mut val = thread_rng().gen();
+    for (i, tile_type) in tile_types.iter().enumerate() {
+        let prob = tile_type.occurrence_prob;
         if prob >= val {
             return i;
         } else {
             val -= prob;
         }
     }
-
-    return 0;
+    0
 }
 
 fn fill_tilemap_without_building_area(

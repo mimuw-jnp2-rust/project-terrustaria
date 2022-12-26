@@ -12,7 +12,7 @@ mod map;
 use map::{spawn_background, spawn_foreground_map, spawn_wall_map};
 
 mod constants;
-use constants::{BOUNDS, TIME_STEP, Z_FOREGROUND};
+use constants::{BOUNDS, TIME_STEP, Z_FOREGROUND, CAMERA_POS, PLAYER_POS};
 
 mod debug_helpers;
 use debug_helpers::camera_debug_movement;
@@ -158,6 +158,7 @@ fn spawn_big_box_collider(mut commands: Commands) {
 }
 
 fn setup_camera(mut commands: Commands) {
+    // commands.spawn(Camera2dBundle::default()).insert(Transform::from_translation(CAMERA_POS));
     commands.spawn(Camera2dBundle::default());
 }
 
