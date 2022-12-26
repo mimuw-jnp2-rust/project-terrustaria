@@ -5,13 +5,6 @@ use rand::prelude::*;
 
 use crate::constants::*;
 
-//todo: Przyciemnić miejsca, których nie widzimy pod ziemią
-//todo: Interakcja Myszka-Kafelek
-//todo: Niszczenie kafelków
-//todo: Zmiana Struktur na ładniejsze, w szczególności bez ramek
-//todo: Chunking?
-//todo: przesuwanie tła w momencie kiedy gracz się porusza/zapętlenie tła/zmiana na basic kolor
-
 struct TileType {
     #[allow(dead_code)]
     name: String,
@@ -117,7 +110,8 @@ fn fill_tilemap_randomly_with_colliders(
                 .insert(RigidBody::Fixed)
                 .insert(Collider::cuboid(16., 16.))
                 .insert(TransformBundle::from(Transform::from_translation(
-                    (Vec2::new((x * 16) as f32 -8., (y * 16) as f32 -8.) + map_transform_vec2()).extend(0.),
+                    (Vec2::new((x * 16) as f32 - 8., (y * 16) as f32 - 8.) + map_transform_vec2())
+                        .extend(0.),
                 )))
                 .id();
             tile_storage.set(&tile_pos, tile_entity);

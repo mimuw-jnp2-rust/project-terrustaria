@@ -1,5 +1,7 @@
 use bevy::prelude::*;
-use bevy_ecs_tilemap::prelude::{TilePos, TilemapType, TilemapGridSize, TilemapTileSize, TilemapSize};
+use bevy_ecs_tilemap::prelude::{
+    TilePos, TilemapGridSize, TilemapSize, TilemapTileSize, TilemapType,
+};
 
 // depth of field constants
 pub const Z_BACKGROUND: f32 = 0.;

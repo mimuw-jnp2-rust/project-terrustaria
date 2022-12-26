@@ -49,7 +49,6 @@ pub fn camera_debug_movement(
     }
 }
 
-
 // can be called with (x,y) transforming to (x,y,Z_FRGRND) or empty transforming to (0,0,Z_FRGRND)
 #[macro_export]
 macro_rules! bring_to_foreground {
@@ -61,9 +60,8 @@ macro_rules! bring_to_foreground {
     };
 }
 
-pub(crate) use bring_to_foreground;
 use crate::constants::Z_FOREGROUND;
-
+pub(crate) use bring_to_foreground;
 
 #[allow(dead_code)]
 //spawns big box collider for testing
@@ -74,5 +72,9 @@ pub fn spawn_big_box_collider(mut commands: Commands) {
         .spawn((BigBoxCollider, Collider::cuboid(500., 100.)))
         .insert(Name::new("BoxCollider"))
         .insert(RigidBody::Fixed)
-        .insert(TransformBundle::from(Transform::from_xyz(0., -200., Z_FOREGROUND)));
+        .insert(TransformBundle::from(Transform::from_xyz(
+            0.,
+            -200.,
+            Z_FOREGROUND,
+        )));
 }

@@ -35,3 +35,11 @@ Second part:
 - Bevy
 - bevy_ecs_tilemap library (https://github.com/StarArawn/bevy_ecs_tilemap)
 - Serde for serialization.
+
+## What we realized in the first part:
+- creating block types - we implemented the way it should work, can be extended by changing graphics and using texture containers
+- generating world maps - we implemented basic random map generation, can be extended by spawning resources in groups and by spawning caves. We also managed to create a wall map and prepare a space for building in the next part.
+- adding a player and an option to move - after hours spent with colliders, we managed to add them to map and player, they do collide, unfortunately camera does not follow player, and player kinda flies. Extension options: make it work as intended.
+- player is able to mine now - we managed to implement highlighting the tiles, the next steps are: highlight them in range of a player, and destroy tiles that are in the range of the player.
+
+- After launching the game, using arrows you can steer our cool player, and using WASD, Z, X you can view the map (option for debug). Right now colliders projection can be seen, this is also a debug option.
