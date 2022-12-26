@@ -1,6 +1,5 @@
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
-use bevy_rapier2d::prelude::*;
 use rand::prelude::*;
 
 use crate::constants::*;
@@ -37,8 +36,12 @@ struct TileType {
 }
 
 impl TileType {
-    fn new(name: String, occurrence_prob: f32, texture_index: TileTextureIndex,
-           valid: impl Fn(u32, u32) -> bool + 'static) -> Self {
+    fn new(
+        name: String,
+        occurrence_prob: f32,
+        texture_index: TileTextureIndex,
+        valid: impl Fn(u32, u32) -> bool + 'static,
+    ) -> Self {
         Self {
             name,
             occurrence_prob,
@@ -49,10 +52,14 @@ impl TileType {
 }
 
 fn init_tile_types() -> Vec<TileType> {
-     vec! [
+    vec![
         TileType::new(String::from("Grass"), 0.6, TileTextureIndex(0), |_, _| true),
-        TileType::new(String::from("Stone"), 0.3, TileTextureIndex(3), |_, y| y < 5),
-        TileType::new(String::from("Water"), 0.1, TileTextureIndex(1), |x, y| y < 10 && x % 2 == 0),
+        TileType::new(String::from("Stone"), 0.3, TileTextureIndex(3), |_, y| {
+            y < 5
+        }),
+        TileType::new(String::from("Water"), 0.1, TileTextureIndex(1), |x, y| {
+            y < 10 && x % 2 == 0
+        }),
     ]
 }
 
@@ -82,7 +89,7 @@ fn fill_tilemap_without_building_area(
     for x in 0..map_size.x {
         for y in 0..map_size.y - BUILDING_HEIGHT {
             let tile_pos = TilePos { x, y };
-            let mut idx: usize = 0;
+            let mut idx: usize;
             loop {
                 idx = get_random_tile_type(&tile_types);
                 if (tile_types[idx].valid)(x, y) {
@@ -111,13 +118,19 @@ fn fill_tilemap_without_building_area(
     }
 }
 
-fn spawn_map(mut commands: Commands, asset_server: Res<AssetServer>, texture_id: u32, z_translation: f32, map_name: &str) {
+fn spawn_map(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    texture_id: u32,
+    z_translation: f32,
+    map_name: &str,
+) {
     let texture_handle: Handle<Image> = asset_server.load("tiles.png");
     let mut tile_storage = TileStorage::empty(MAP_SIZE);
-    let tilemap_entity =
-        commands.spawn_empty()
-            .insert(Name::new(format!("{map_name}Map")))
-            .id();
+    let tilemap_entity = commands
+        .spawn_empty()
+        .insert(Name::new(format!("{map_name}Map")))
+        .id();
 
     fill_tilemap_without_building_area(
         TileTextureIndex(texture_id),
@@ -156,12 +169,10 @@ pub fn spawn_background(mut commands: Commands, asset_server: Res<AssetServer>) 
         .insert(Name::new("Background"));
 }
 
-pub fn spawn_wall_map(commands: Commands,
-                      asset_server: Res<AssetServer>) {
+pub fn spawn_wall_map(commands: Commands, asset_server: Res<AssetServer>) {
     spawn_map(commands, asset_server, 3, Z_WALLS, "Wall");
 }
 
-pub fn spawn_foreground_map(commands: Commands,
-                            asset_server: Res<AssetServer>) {
+pub fn spawn_foreground_map(commands: Commands, asset_server: Res<AssetServer>) {
     spawn_map(commands, asset_server, 0, Z_FOREGROUND, "Foreground");
 }

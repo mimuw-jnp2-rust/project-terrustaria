@@ -46,3 +46,16 @@ pub fn camera_debug_movement(
         transform.translation.z = z;
     }
 }
+
+// Can be called with (x,y) transforming to (x,y,Z_FRGRND) or empty transforming to (0,0,Z_FRGRND)
+#[macro_export]
+macro_rules! bring_to_foreground {
+    ($x:expr, $y:expr) => {
+        Transform::from_xyz($x, $y, Z_FOREGROUND)
+    };
+    () => {
+        Transform::from_xyz(0., 0., Z_FOREGROUND)
+    };
+}
+
+pub(crate) use bring_to_foreground;
