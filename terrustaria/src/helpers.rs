@@ -1,4 +1,6 @@
 use bevy::prelude::*;
+use bevy_rapier2d::dynamics::RigidBody;
+use bevy_rapier2d::geometry::Collider;
 
 // a simple camera system for moving and zooming the camera
 // to easily see what is the output of what we create deep down in the mine
@@ -47,6 +49,7 @@ pub fn camera_debug_movement(
     }
 }
 
+
 // can be called with (x,y) transforming to (x,y,Z_FRGRND) or empty transforming to (0,0,Z_FRGRND)
 #[macro_export]
 macro_rules! bring_to_foreground {
@@ -59,3 +62,17 @@ macro_rules! bring_to_foreground {
 }
 
 pub(crate) use bring_to_foreground;
+use crate::constants::Z_FOREGROUND;
+
+
+#[allow(dead_code)]
+//spawns big box collider for testing
+pub fn spawn_big_box_collider(mut commands: Commands) {
+    #[derive(Component)]
+    struct BigBoxCollider;
+    commands
+        .spawn((BigBoxCollider, Collider::cuboid(500., 100.)))
+        .insert(Name::new("BoxCollider"))
+        .insert(RigidBody::Fixed)
+        .insert(TransformBundle::from(Transform::from_xyz(0., -200., Z_FOREGROUND)));
+}

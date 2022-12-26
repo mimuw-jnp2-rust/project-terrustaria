@@ -21,7 +21,6 @@ pub fn spawn_player(mut commands: Commands, asset_server: Res<AssetServer>) {
         .spawn((
             SpriteBundle {
                 texture: ship_handle,
-                // transform: bring_to_foreground!(0., 50.),
                 ..default()
             },
             Player {

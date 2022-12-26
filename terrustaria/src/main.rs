@@ -4,10 +4,10 @@ use bevy_inspector_egui::WorldInspectorPlugin;
 use bevy_rapier2d::prelude::*;
 
 mod map;
-use map::{spawn_background, spawn_foreground_map};
+use map::{spawn_background, spawn_foreground_map, spawn_wall_map};
 
 mod constants;
-use constants::{TIME_STEP, Z_FOREGROUND};
+use constants::{TIME_STEP};
 
 mod helpers;
 use helpers::camera_debug_movement;
@@ -38,7 +38,7 @@ fn main() {
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(300.))
         .add_plugin(RapierDebugRenderPlugin::default())
         .add_startup_system(spawn_background)
-        // .add_startup_system(spawn_wall_map)
+        .add_startup_system(spawn_wall_map)
         .add_startup_system(spawn_foreground_map)
         .add_startup_system(spawn_player)
         .add_startup_system(spawn_enemies)
@@ -57,16 +57,6 @@ fn main() {
 }
 
 fn setup_camera(mut commands: Commands) {
-    // commands.spawn(Camera2dBundle::default()).insert(Transform::from_translation(CAMERA_POS));
     commands.spawn(Camera2dBundle::default());
 }
 
-fn spawn_big_box_collider(mut commands: Commands) {
-    #[derive(Component)]
-    struct XD;
-    commands
-        .spawn((XD, Collider::cuboid(500., 100.)))
-        .insert(Name::new("BoxCollider"))
-        .insert(RigidBody::Fixed)
-        .insert(TransformBundle::from(bring_to_foreground!(0., -200.)));
-}
