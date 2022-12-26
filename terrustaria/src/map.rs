@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
 use bevy_rapier2d::prelude::*;
+use rand::prelude::*;
 
 use crate::constants::*;
 
@@ -28,6 +29,51 @@ fn transform_map(
     Transform::from_xyz(-diff.x / 2., -diff.y, z)
 }
 
+struct TileType {
+    name: String,
+    occurrence_prob: f32,
+    texture_index: TileTextureIndex,
+    valid: Box<dyn Fn(u32, u32) -> bool>,
+}
+
+impl TileType {
+    fn new(name: String, occurrence_prob: f32, texture_index: TileTextureIndex,
+           valid: impl Fn(u32, u32) -> bool + 'static) -> Self {
+        Self {
+            name,
+            occurrence_prob,
+            texture_index,
+            valid: Box::new(valid),
+        }
+    }
+}
+
+fn init_tile_types() -> Vec<TileType> {
+    let mut tile_types = Vec::with_capacity(3);
+    tile_types.push(TileType::new(String::from("Grass"), 0.6,
+                                  TileTextureIndex(0), |x, y| true));
+    tile_types.push(TileType::new(String::from("Stone"), 0.3,
+                                  TileTextureIndex(3), |x, y| y < 5));
+    tile_types.push(TileType::new(String::from("Water"), 0.1,
+                                  TileTextureIndex(1), |x, y| y < 10 && x % 2 == 0));
+    return tile_types;
+}
+
+fn get_random_tile_type(tile_types: &Vec<TileType>) -> usize {
+    let mut rng = thread_rng();
+    let mut val: f32 = rng.gen();
+    for i in 0..tile_types.len() {
+        let prob = tile_types[i].occurrence_prob;
+        if prob >= val {
+            return i;
+        } else {
+            val -= prob;
+        }
+    }
+
+    return 0;
+}
+
 fn fill_tilemap_without_building_area(
     texture_index: TileTextureIndex,
     map_size: TilemapSize,
@@ -36,34 +82,42 @@ fn fill_tilemap_without_building_area(
     tile_storage: &mut TileStorage,
     map_name: &str,
 ) {
+    let tile_types = init_tile_types();
+
     for x in 0..map_size.x {
         for y in 0..map_size.y - BUILDING_HEIGHT {
             let tile_pos = TilePos { x, y };
+            let mut idx: usize = 0;
+            loop {
+                idx = get_random_tile_type(&tile_types);
+                if (tile_types[idx].valid)(x, y) {
+                    break;
+                }
+            }
 
             let tile_entity = commands
                 .spawn(TileBundle {
                     position: tile_pos,
                     tilemap_id,
-                    texture_index,
+                    texture_index: tile_types[idx].texture_index,
                     ..Default::default()
                 })
                 .insert(Name::new(format!("{map_name}Tile({x},{y})")))
-                .insert(RigidBody::Fixed)
-                .insert(Collider::cuboid(16., 16.))
-                .insert(TransformBundle::from(Transform::from_xyz(
-                    (x * 16) as f32,
-                    (y * 16) as f32,
-                    0.,
-                )))
+                // .insert(RigidBody::Fixed)
+                // .insert(Collider::cuboid(16., 16.))
+                // .insert(TransformBundle::from(Transform::from_xyz(
+                //     (x * 16) as f32,
+                //     (y * 16) as f32,
+                //     0.,
+                // )))
                 .id();
             tile_storage.set(&tile_pos, tile_entity);
         }
     }
 }
 
-fn spawn_map(mut commands: Commands, asset_server: Res<AssetServer>, texture_id: u32,  z_translation: f32, map_name: &str) {
+fn spawn_map(mut commands: Commands, asset_server: Res<AssetServer>, texture_id: u32, z_translation: f32, map_name: &str) {
     let texture_handle: Handle<Image> = asset_server.load("tiles.png");
-
     let mut tile_storage = TileStorage::empty(MAP_SIZE);
     let tilemap_entity =
         commands.spawn_empty()
@@ -76,7 +130,7 @@ fn spawn_map(mut commands: Commands, asset_server: Res<AssetServer>, texture_id:
         TilemapId(tilemap_entity),
         &mut commands,
         &mut tile_storage,
-        map_name
+        map_name,
     );
 
     let tile_size = TilemapTileSize { x: 16.0, y: 16.0 };
@@ -98,22 +152,21 @@ fn spawn_map(mut commands: Commands, asset_server: Res<AssetServer>, texture_id:
 pub fn spawn_background(mut commands: Commands, asset_server: Res<AssetServer>) {
     let background: Handle<Image> = asset_server.load("background.png");
 
-    commands.spawn(SpriteBundle {
-        texture: background,
-        transform: Transform::from_xyz(0.0, 0.0, Z_BACKGROUND),
-        ..Default::default()
-    })
-    .insert(Name::new("Background"));
+    commands
+        .spawn(SpriteBundle {
+            texture: background,
+            transform: Transform::from_xyz(0.0, 0.0, Z_BACKGROUND),
+            ..Default::default()
+        })
+        .insert(Name::new("Background"));
 }
 
 pub fn spawn_wall_map(commands: Commands,
-                             asset_server: Res<AssetServer>) {
+                      asset_server: Res<AssetServer>) {
     spawn_map(commands, asset_server, 3, Z_WALLS, "Wall");
 }
 
 pub fn spawn_foreground_map(commands: Commands,
-                        asset_server: Res<AssetServer>) {
+                            asset_server: Res<AssetServer>) {
     spawn_map(commands, asset_server, 0, Z_FOREGROUND, "Foreground");
-
 }
-

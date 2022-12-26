@@ -1,4 +1,8 @@
-use bevy::{math::Vec3Swizzles, prelude::*, time::FixedTimestep};
+use bevy::{
+    math::Vec3Swizzles,
+    prelude::*,
+    time::FixedTimestep,
+};
 use bevy_ecs_tilemap::prelude::*;
 use bevy_rapier2d::prelude::*;
 use bevy_inspector_egui::WorldInspectorPlugin;
@@ -47,7 +51,7 @@ fn main() {
         .add_startup_system(spawn_foreground_map)
         .add_startup_system(spawn_player)
         .add_startup_system(spawn_enemies)
-        .add_startup_system(spawn_big_box_colider)
+        //.add_startup_system(spawn_big_box_collider)
         .add_startup_system(setup_camera)
         .add_system(camera_debug_movement)
         .add_system_set(
@@ -141,14 +145,14 @@ fn spawn_enemies(mut commands: Commands, asset_server: Res<AssetServer>) {
         .insert(Collider::cuboid(10., 10.)).insert(TransformBundle::from(bring_to_foreground!(horizontal_margin, 100.)));
 }
 
-fn spawn_big_box_colider(mut commands: Commands) {
+fn spawn_big_box_collider(mut commands: Commands) {
     #[derive(Component)]
     struct XD;
     commands
         .spawn((XD,
             Collider::cuboid( 500., 100.),
         ))
-        .insert(Name::new("BoxColider"))
+        .insert(Name::new("BoxCollider"))
         .insert(RigidBody::Fixed)
         .insert(TransformBundle::from(bring_to_foreground!(0., -200.)));
 }
