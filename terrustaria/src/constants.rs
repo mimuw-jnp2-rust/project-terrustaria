@@ -1,4 +1,5 @@
 use bevy::math::{Vec2, Vec3};
+use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::{TilemapGridSize, TilemapSize};
 
 // depth of field constants
@@ -15,6 +16,14 @@ pub const PLAYER_POS: Vec2 = Vec2::new(100., 100.);
 
 // camera constants
 pub const CAMERA_POS: Vec3 = PLAYER_POS.extend(1000.);
+
+// color constants
+pub const TRANSPARENT: Color = Color::Rgba {
+    red: 0.0,
+    green: 0.0,
+    blue: 0.0,
+    alpha: 0.0,
+};
 
 // map constants
 const MAP_WIDTH: u32 = 32;
