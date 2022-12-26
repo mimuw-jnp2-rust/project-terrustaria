@@ -19,8 +19,8 @@ pub const TRANSPARENT: Color = Color::Rgba {
 };
 
 // map constants
-const MAP_WIDTH: u32 = 32;
-const MAP_DEPTH: u32 = 16;
+const MAP_WIDTH: u32 = 64;
+const MAP_DEPTH: u32 = 32;
 pub const BUILDING_HEIGHT: u32 = 15;
 pub const MAP_SIZE: TilemapSize = TilemapSize {
     x: MAP_WIDTH,

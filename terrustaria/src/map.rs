@@ -40,10 +40,10 @@ fn init_tile_types() -> Vec<TileType> {
     vec![
         TileType::new(String::from("Grass"), 0.6, TileTextureIndex(0), |_, _| true),
         TileType::new(String::from("Stone"), 0.3, TileTextureIndex(3), |_, y| {
-            y < 5
+            y < 12
         }),
         TileType::new(String::from("Water"), 0.1, TileTextureIndex(1), |x, y| {
-            y < 10 && x % 2 == 0
+            y < 20 && x % 2 == 0
         }),
     ]
 }
