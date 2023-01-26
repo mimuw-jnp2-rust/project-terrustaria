@@ -24,7 +24,7 @@ pub fn spawn_player(mut commands: Commands, asset_server: Res<AssetServer>) {
                 ..default()
             },
             Player {
-                movement_speed: 500.0,                  // metres per second
+                movement_speed: 100.0, // metres per second
                 rotation_speed: f32::to_radians(180.0), // degrees per second
             },
         ))

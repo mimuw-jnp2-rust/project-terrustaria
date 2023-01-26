@@ -4,7 +4,7 @@ use bevy_inspector_egui::WorldInspectorPlugin;
 use bevy_rapier2d::prelude::*;
 
 mod map;
-use map::{spawn_background, spawn_foreground_map, spawn_wall_map};
+use map::{spawn_background, spawn_foreground_map, spawn_wall_map, spawn_colliders};
 
 mod constants;
 use constants::TIME_STEP;
@@ -52,6 +52,7 @@ fn main() {
         .add_startup_system(spawn_wall_map)
         .add_startup_system(spawn_foreground_map)
         .add_startup_system_to_stage(StartupStage::PostStartup, spawn_tile_labels)
+        .add_startup_system_to_stage(StartupStage::PostStartup, spawn_colliders)
         .add_startup_system(spawn_player)
         .add_startup_system(spawn_enemies)
         //.add_startup_system(spawn_big_box_collider)
