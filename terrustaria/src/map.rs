@@ -7,14 +7,21 @@ use crate::constants::*;
 use crate::tile::*;
 
 
-fn get_random_tile_type(tile_types: &TileCollection) -> usize {
-    let mut val = thread_rng().gen();
+fn random_in_range(range: f32) -> f32 {
+    let val: f32 = thread_rng().gen();
+    val * range
+}
+
+fn get_random_tile_type(tile_types: &TileCollection, pos: &TilePos) -> usize {
+    let rarity_sum = tile_types.rarity_sum_valid(pos);
+    let mut random = random_in_range(rarity_sum);
     for (i, tile_type) in tile_types.get_tiles().iter().enumerate() {
-        let prob = tile_type.get_prob();
-        if prob >= val {
-            return i;
-        } else {
-            val -= prob;
+        if tile_type.is_valid(pos) {
+            if random < tile_type.get_rarity() {
+                return i;
+            } else {
+                random -= tile_type.get_rarity();
+            }
         }
     }
     0
@@ -59,7 +66,7 @@ fn fill_tilemap_randomly_with_colliders(
             let tile_pos = TilePos { x, y };
             let mut idx: usize;
             loop {
-                idx = get_random_tile_type(&tile_types);
+                idx = get_random_tile_type(&tile_types, &tile_pos);
                 if tile_types.at(idx).is_valid(&tile_pos) {
                     break;
                 }
