@@ -1,6 +1,7 @@
 use bevy_ecs_tilemap::prelude::*;
 
-pub const MAX_CAVE_SIZE: u32 = 50;
+use crate::constants::MAP_SIZE;
+
 
 pub struct TileType {
     #[allow(dead_code)]
@@ -34,7 +35,7 @@ impl TileType {
     }
 
     pub fn is_valid(&self, pos: &TilePos) -> bool {
-        (self.valid)(pos.x, pos.y)
+        (self.valid)(pos.x, pos.y) && pos.x < MAP_SIZE.x && pos.y < MAP_SIZE.y
     }
 }
 
@@ -47,7 +48,7 @@ impl TileCollection {
         Self {
             types: vec![
                 TileType::new(String::from("Grass"), 60.0, TileTextureIndex(0), |_, _| true),
-                TileType::new(String::from("Stone"), 30.0, TileTextureIndex(3), |_, y| {
+                TileType::new(String::from("Stone"), 10.0, TileTextureIndex(3), |_, y| {
                     y < 12
                 }),
                 TileType::new(String::from("Water"), 10.0, TileTextureIndex(1), |_, y| {
@@ -66,6 +67,10 @@ impl TileCollection {
 
     pub fn at(&self, idx: usize) -> &TileType {
         &self.types[idx]
+    }
+
+    pub fn stone_tile(&self) -> &TileType {
+        self.at(1)
     }
 
     pub fn rarity_sum_valid(&self, pos: &TilePos) -> f32 {

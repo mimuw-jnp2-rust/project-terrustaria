@@ -12,6 +12,11 @@ fn random_in_range(range: f32) -> f32 {
     val * range
 }
 
+fn random_u32(a: u32, b: u32) -> u32 {
+    let val: f32 = thread_rng().gen();
+    return (((b - a) as f32) * val - 0.001) as u32 + a;
+}
+
 fn get_random_tile_type(tile_types: &TileCollection, pos: &TilePos) -> usize {
     let rarity_sum = tile_types.rarity_sum_valid(pos);
     let mut random = random_in_range(rarity_sum);
@@ -25,6 +30,38 @@ fn get_random_tile_type(tile_types: &TileCollection, pos: &TilePos) -> usize {
         }
     }
     0
+}
+
+fn create_cave(tile_types: &TileCollection, visited: &mut Vec<Vec<bool>>, start_pos: TilePos, mut size: u32) -> Vec<TilePos> {
+    if MAX_CAVE_SIZE < size {
+        size = MAX_CAVE_SIZE;
+    }
+
+    let dx = vec![-1, 0, 1, 0];
+    let dy = vec![0, -1, 0, 1];
+    let mut in_cave = vec![start_pos];
+    visited[start_pos.x as usize][start_pos.y as usize] = true;
+    let mut processed: usize = 0;
+    let start_size = size as f32;
+    let stone_tile = tile_types.stone_tile();
+
+    while processed < in_cave.len() && size > 0 {
+        let pos = in_cave[processed];
+        for i in 0..4 {
+            let new_pos = TilePos { x: (pos.x as i32 + dx[i]) as u32, y: (pos.y as i32 + dy[i]) as u32 };
+            if stone_tile.is_valid(&new_pos) && !visited[new_pos.x as usize][new_pos.y as usize] {
+                // Some randomization.
+                if random_in_range(start_size) <= start_size - (processed as f32) {
+                    visited[new_pos.x as usize][new_pos.y as usize] = true;
+                    in_cave.push(new_pos);
+                }
+            }
+        }
+        processed += 1;
+        size -= 1;
+    }
+
+    in_cave
 }
 
 // Fills the tilemap with set texture_id, does not fill building area.
@@ -60,9 +97,42 @@ fn fill_tilemap_randomly_with_colliders(
     map_name: &str,
 ) {
     let tile_types = TileCollection::new();
+    let mut visited = vec![vec![false; MAP_SIZE.y as usize]; MAP_SIZE.x as usize];
 
+    // Create a cave.
+    let start_x = random_u32(0, MAP_SIZE.x);
+    let start_y = random_u32(0, 10);
+    let in_cave = create_cave(&tile_types, &mut visited, TilePos { x: start_x, y: start_y }, MAX_CAVE_SIZE);
+    for tile_pos in in_cave {
+        let x = tile_pos.x;
+        let y = tile_pos.y;
+        let tile_entity = commands
+            .spawn(TileBundle {
+                position: tile_pos,
+                tilemap_id,
+                texture_index: tile_types.stone_tile().get_texture_index(),
+                ..Default::default()
+            })
+            .insert(Name::new(format!("{map_name}Tile({x},{y})")))
+            .insert(RigidBody::Fixed)
+            .insert(Collider::cuboid(16., 16.))
+            .insert(TransformBundle::from(Transform::from_translation(
+                (Vec2::new((x * 16) as f32 - 8., (y * 16) as f32 - 8.) + map_transform_vec2())
+                    .extend(0.),
+            )))
+            .id();
+        tile_storage.set(&tile_pos, tile_entity);
+    }
+
+    // Fill standard tiles.
     for x in 0..MAP_SIZE.x {
         for y in 0..MAP_SIZE.y - BUILDING_HEIGHT {
+            if visited[x as usize][y as usize] {
+                continue;
+            } else {
+                visited[x as usize][y as usize] = true;
+            }
+
             let tile_pos = TilePos { x, y };
             let mut idx: usize;
             loop {

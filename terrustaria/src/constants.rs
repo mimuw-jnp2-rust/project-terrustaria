@@ -33,6 +33,9 @@ pub const MAP_TYPE: TilemapType = TilemapType::Square;
 pub const TILE_SIZE: TilemapTileSize = TilemapTileSize { x: 16., y: 16. };
 pub const GRID_SIZE: TilemapGridSize = TilemapGridSize { x: 16., y: 16. };
 
+pub const MAX_CAVE_SIZE: u32 = 100;
+
+
 // counts x and y translation of map, that top middle tile of the map is located in (0.0)
 pub fn map_transform_vec2() -> Vec2 {
     let low = TilePos::new(0, 0).center_in_world(&GRID_SIZE, &MAP_TYPE);
