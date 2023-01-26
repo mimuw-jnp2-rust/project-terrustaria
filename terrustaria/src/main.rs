@@ -22,6 +22,9 @@ mod cursor;
 use cursor::{update_cursor_pos, CursorPos};
 
 mod highlight;
+
+mod tile;
+
 use highlight::{highlight_tile_labels, spawn_tile_labels, FontHandle};
 
 fn main() {

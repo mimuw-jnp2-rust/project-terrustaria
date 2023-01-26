@@ -4,47 +4,13 @@ use bevy_rapier2d::prelude::*;
 use rand::prelude::*;
 
 use crate::constants::*;
+use crate::tile::*;
 
-struct TileType {
-    #[allow(dead_code)]
-    name: String,
-    occurrence_prob: f32,
-    texture_index: TileTextureIndex,
-    valid: Box<dyn Fn(u32, u32) -> bool>,
-}
 
-impl TileType {
-    fn new(
-        name: String,
-        occurrence_prob: f32,
-        texture_index: TileTextureIndex,
-        valid: impl Fn(u32, u32) -> bool + 'static,
-    ) -> Self {
-        Self {
-            name,
-            occurrence_prob,
-            texture_index,
-            valid: Box::new(valid),
-        }
-    }
-}
-
-fn init_tile_types() -> Vec<TileType> {
-    vec![
-        TileType::new(String::from("Grass"), 0.6, TileTextureIndex(0), |_, _| true),
-        TileType::new(String::from("Stone"), 0.3, TileTextureIndex(3), |_, y| {
-            y < 12
-        }),
-        TileType::new(String::from("Water"), 0.1, TileTextureIndex(1), |x, y| {
-            y < 20 && x % 2 == 0
-        }),
-    ]
-}
-
-fn get_random_tile_type(tile_types: &[TileType]) -> usize {
+fn get_random_tile_type(tile_types: &TileCollection) -> usize {
     let mut val = thread_rng().gen();
-    for (i, tile_type) in tile_types.iter().enumerate() {
-        let prob = tile_type.occurrence_prob;
+    for (i, tile_type) in tile_types.get_tiles().iter().enumerate() {
+        let prob = tile_type.get_prob();
         if prob >= val {
             return i;
         } else {
@@ -86,7 +52,7 @@ fn fill_tilemap_randomly_with_colliders(
     tile_storage: &mut TileStorage,
     map_name: &str,
 ) {
-    let tile_types = init_tile_types();
+    let tile_types = TileCollection::new();
 
     for x in 0..MAP_SIZE.x {
         for y in 0..MAP_SIZE.y - BUILDING_HEIGHT {
@@ -94,7 +60,7 @@ fn fill_tilemap_randomly_with_colliders(
             let mut idx: usize;
             loop {
                 idx = get_random_tile_type(&tile_types);
-                if (tile_types[idx].valid)(x, y) {
+                if tile_types.at(idx).is_valid(&tile_pos) {
                     break;
                 }
             }
@@ -103,7 +69,7 @@ fn fill_tilemap_randomly_with_colliders(
                 .spawn(TileBundle {
                     position: tile_pos,
                     tilemap_id,
-                    texture_index: tile_types[idx].texture_index,
+                    texture_index: tile_types.at(idx).get_texture_index(),
                     ..Default::default()
                 })
                 .insert(Name::new(format!("{map_name}Tile({x},{y})")))
