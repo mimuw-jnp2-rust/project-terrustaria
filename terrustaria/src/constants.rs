@@ -20,6 +20,14 @@ pub const TRANSPARENT: Color = Color::Rgba {
     alpha: 0.0,
 };
 
+// tile offsets for tile_strip.png texture asset
+pub mod offsets {
+    pub const DIRT_OFFSET: u32 = 0;
+    pub const STONE_OFFSET: u32 = 1;
+    pub const WATER_OFFSET: u32 = 2;
+    pub const DIAMOND_OFFSET: u32 = 3;
+
+}
 // map constants
 const MAP_WIDTH: u32 = 64;
 const MAP_DEPTH: u32 = 32;
@@ -29,9 +37,11 @@ pub const MAP_SIZE: TilemapSize = TilemapSize {
     y: MAP_DEPTH + BUILDING_HEIGHT,
 };
 
+
 pub const MAP_TYPE: TilemapType = TilemapType::Square;
-pub const TILE_SIZE: TilemapTileSize = TilemapTileSize { x: 16., y: 16. };
-pub const GRID_SIZE: TilemapGridSize = TilemapGridSize { x: 16., y: 16. };
+pub const TILE_SIZE: TilemapTileSize = TilemapTileSize { x: 20., y: 20. };
+pub const GRID_SIZE: TilemapGridSize = TilemapGridSize { x: 20., y: 20. };
+pub const COLLIDER_SIZE: Vec2 = Vec2::new(TILE_SIZE.x / 2., TILE_SIZE.y / 2.);
 
 pub const MAX_CAVE_SIZE: u32 = 100;
 

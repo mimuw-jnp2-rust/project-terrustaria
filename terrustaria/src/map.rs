@@ -177,12 +177,12 @@ pub fn spawn_colliders(
         for tile_entity in tilemap_storage.iter().flatten() {
             let tile_pos = tile_q.get(*tile_entity).unwrap();
             let transform_bundle = TransformBundle::from(Transform::from_translation(
-                (Vec2::new((tile_pos.x * 16) as f32, (tile_pos.y * 16) as f32) + map_transform_vec2())
+                (Vec2::new(tile_pos.x as f32 * GRID_SIZE.x, tile_pos.y as f32 * GRID_SIZE.y) + map_transform_vec2())
                     .extend(0.)));
 
             commands.entity(*tile_entity)
                 .insert(RigidBody::Fixed)
-                .insert(Collider::cuboid(8., 8.))
+                .insert(Collider::cuboid(COLLIDER_SIZE.x, COLLIDER_SIZE.y))
                 .insert(transform_bundle);
         }
     }
@@ -194,7 +194,7 @@ fn spawn_map(
     z_translation: f32,
     map_name: &str,
 ) {
-    let mut texture_handle: Handle<Image> = asset_server.load("tiles.png");
+    let mut texture_handle: Handle<Image> = asset_server.load("tiles_strip.png");
     let mut tile_storage = TileStorage::empty(MAP_SIZE);
     let tilemap_entity = commands
         .spawn_empty()
@@ -202,7 +202,7 @@ fn spawn_map(
         .id();
 
     if map_name == "Wall" {
-        texture_handle = asset_server.load("tiles2.png");
+        texture_handle = asset_server.load("tiles_big.png");
         fill_tilemap_with_set_structure_id(
             TileTextureIndex(3),
             TilemapId(tilemap_entity),

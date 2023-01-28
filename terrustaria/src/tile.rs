@@ -1,6 +1,6 @@
 use bevy_ecs_tilemap::prelude::*;
 
-use crate::constants::MAP_SIZE;
+use crate::constants::{MAP_SIZE, offsets::*};
 
 
 pub struct TileType {
@@ -15,13 +15,13 @@ impl TileType {
     fn new(
         name: String,
         rarity: f32,
-        texture_index: TileTextureIndex,
+        tile_offset: u32,
         valid: impl Fn(u32, u32) -> bool + 'static,
     ) -> Self {
         Self {
             name,
             rarity,
-            texture_index,
+            texture_index: TileTextureIndex(tile_offset * 5),
             valid: Box::new(valid),
         }
     }
@@ -47,14 +47,14 @@ impl TileCollection {
     pub fn new() -> Self {
         Self {
             types: vec![
-                TileType::new(String::from("Grass"), 60.0, TileTextureIndex(0), |_, _| true),
-                TileType::new(String::from("Stone"), 10.0, TileTextureIndex(3), |_, y| {
+                TileType::new(String::from("Dirt"), 60.0, DIRT_OFFSET, |_, _| true),
+                TileType::new(String::from("Stone"), 10.0, STONE_OFFSET, |_, y| {
                     y < 12
                 }),
-                TileType::new(String::from("Water"), 10.0, TileTextureIndex(1), |_, y| {
+                TileType::new(String::from("Water"), 10.0, WATER_OFFSET, |_, y| {
                     y < 20
                 }),
-                TileType::new(String::from("Diamond"), 0.1, TileTextureIndex(5), |_, y| {
+                TileType::new(String::from("Diamond"), 1., DIAMOND_OFFSET, |_, y| {
                     y < 12
                 }),
             ]
