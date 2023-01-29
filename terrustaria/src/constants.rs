@@ -1,8 +1,9 @@
 // depth of field constants
 pub mod depth {
     pub const Z_BACKGROUND: f32 = 0.;
-    pub const Z_WALLS: f32 = 1.;
-    pub const Z_FOREGROUND: f32 = 5.;
+    pub const Z_WALLS: f32 = 0.01;
+    pub const Z_FOREGROUND: f32 = 0.02;
+    pub const Z_PLAYER: f32 = 0.03;
 }
 
 // tile offsets for tile_strip.png texture asset

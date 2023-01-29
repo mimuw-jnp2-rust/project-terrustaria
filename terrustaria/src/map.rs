@@ -206,7 +206,7 @@ fn spawn_map(
         .id();
 
     if map_name == "Wall" {
-        texture_handle = asset_server.load("tiles_big.png");
+        texture_handle = asset_server.load("walls_strip.png");
         fill_tilemap_with_set_structure_id(
             TileTextureIndex(3),
             TilemapId(tilemap_entity),

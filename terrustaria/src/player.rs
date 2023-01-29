@@ -3,11 +3,10 @@ use bevy_rapier2d::prelude::*;
 
 use crate::constants::{
     player::*,
-    depth::Z_FOREGROUND,
+    depth::*,
     collision_groups::PLAYER_COLLIDE_WITH_ALL,
     world::GRAVITY};
 
-use crate::helpers::bring_to_foreground;
 
 #[derive(Component)]
 pub struct Player {
@@ -60,6 +59,7 @@ pub fn spawn_player(mut commands: Commands, asset_server: Res<AssetServer>) {
         .spawn((
             SpriteBundle {
                 texture: player_handle,
+                transform: Transform::from_xyz(0., 50., Z_PLAYER),
                 ..default()
             },
             Player {
@@ -78,9 +78,8 @@ pub fn spawn_player(mut commands: Commands, asset_server: Res<AssetServer>) {
         .insert(GravityScale(GRAVITY))
         .insert(Velocity::zero())
 
-        .insert(TransformBundle::from(bring_to_foreground!(0., 50.)))
         .with_children(|parent| {
-            parent.spawn((Camera2dBundle::default(), MainCamera));
+            parent.spawn((Camera2dBundle::new_with_far(100.), MainCamera));
         })
     ;
 }
