@@ -14,6 +14,8 @@ pub struct Player {
     // linear speed in meters per second
     movement_speed: f32,
 }
+#[derive(Component)]
+pub struct MainCamera;
 
 #[derive(Component)]
 pub struct Jumper {
@@ -78,14 +80,7 @@ pub fn spawn_player(mut commands: Commands, asset_server: Res<AssetServer>) {
 
         .insert(TransformBundle::from(bring_to_foreground!(0., 50.)))
         .with_children(|parent| {
-            parent.spawn(Camera2dBundle {
-                camera: Camera {
-                    // renders before the main camera which has default value: 0
-                    priority: -1,
-                    ..default()
-                },
-                ..default()
-            });
+            parent.spawn((Camera2dBundle::default(), MainCamera));
         })
     ;
 }

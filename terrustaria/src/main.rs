@@ -55,14 +55,14 @@ fn main() {
         .add_startup_system(spawn_player)
         .add_startup_system(spawn_enemies)
         //.add_startup_system(spawn_big_box_collider)
-        .add_startup_system(setup_camera)
+        // .add_startup_system(setup_camera)
         .add_system(camera_movement)
-        .add_system_to_stage(CoreStage::First, update_cursor_pos.after(camera_movement))
-        .add_system(destroy_tile_after_click)
         //player systems
         .add_system(player_jump)
         .add_system(player_jump_reset)
         .add_system(player_movement)
+        .add_system(update_cursor_pos)
+        .add_system(destroy_tile_after_click)
         // .add_system(display_events)
         .add_system_set(
             SystemSet::new()
