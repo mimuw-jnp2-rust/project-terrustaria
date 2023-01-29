@@ -3,7 +3,9 @@ use bevy_ecs_tilemap::prelude::*;
 use bevy_rapier2d::prelude::*;
 use rand::prelude::*;
 
-use crate::constants::*;
+use crate::constants::{map::*,
+                       depth::*,
+                       collision_groups::MAP_COLLIDE_WITH_ALL_EXCEPT_MAP};
 use crate::tile::*;
 
 #[derive(Component)]
@@ -183,6 +185,8 @@ pub fn spawn_colliders(
             commands.entity(*tile_entity)
                 .insert(RigidBody::Fixed)
                 .insert(Collider::cuboid(COLLIDER_SIZE.x, COLLIDER_SIZE.y))
+                .insert(MAP_COLLIDE_WITH_ALL_EXCEPT_MAP)
+                .insert(ActiveEvents::COLLISION_EVENTS)
                 .insert(transform_bundle);
         }
     }

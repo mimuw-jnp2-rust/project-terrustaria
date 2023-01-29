@@ -1,8 +1,11 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
-use crate::constants;
-use constants::{BOUNDS, TIME_STEP, Z_FOREGROUND};
+use crate::constants::{
+    player::*,
+    depth::Z_FOREGROUND,
+    collision_groups::PLAYER_COLLIDE_WITH_ALL,
+    world::GRAVITY};
 
 use crate::helpers::bring_to_foreground;
 
@@ -10,64 +13,87 @@ use crate::helpers::bring_to_foreground;
 pub struct Player {
     // linear speed in meters per second
     movement_speed: f32,
-    // rotation speed in radians per second
-    rotation_speed: f32,
+}
+
+#[derive(Component)]
+pub struct Jumper {
+    jump_impulse: f32,
+    is_jumping: bool,
+}
+
+pub fn player_jump(
+    keyboard_input: Res<Input<KeyCode>>,
+    mut players: Query<(&mut Jumper, &mut Velocity), With<Player>>
+) {
+    for (mut jumper, mut velocity) in players.iter_mut() {
+        if keyboard_input.pressed(KeyCode::Space) && !jumper.is_jumping {
+            velocity.linvel = Vec2::new(0., jumper.jump_impulse);
+            jumper.is_jumping = true
+        }
+    }
+}
+
+pub fn player_jump_reset(
+    mut query: Query<(Entity, &mut Jumper)>,
+    mut contact_events: EventReader<CollisionEvent>,
+) {
+    for contact_event in contact_events.iter() {
+        for (entity, mut jumper) in query.iter_mut() {
+            set_jumping_false_if_touching_floor(entity, &mut jumper, contact_event);
+        }
+    }
+}
+
+fn set_jumping_false_if_touching_floor(entity: Entity, jumper: &mut Jumper, event: &CollisionEvent) {
+    if let CollisionEvent::Started(h1, h2, ..) = event {
+        println!("denu");
+        if *h1 == entity || *h2 == entity {
+            jumper.is_jumping = false
+        }
+    }
 }
 
 pub fn spawn_player(mut commands: Commands, asset_server: Res<AssetServer>) {
-    let ship_handle: Handle<Image> = asset_server.load("textures/simplespace/ship_C.png");
-
+    let player_handle: Handle<Image> = asset_server.load("textures/rpg/tiles/generic-rpg-Slice.png");
     commands
         .spawn((
             SpriteBundle {
-                texture: ship_handle,
+                texture: player_handle,
                 ..default()
             },
             Player {
-                movement_speed: 100.0, // metres per second
-                rotation_speed: f32::to_radians(180.0), // degrees per second
+                movement_speed: MOVEMENT_SPEED, // metres per second
             },
         ))
+        .insert(Jumper { jump_impulse: JUMP_POWER, is_jumping: false })
         .insert(Name::new("Player"))
+
         .insert(RigidBody::Dynamic)
-        .insert(Collider::ball(10.))
-        .insert(GravityScale(0.))
-        .insert(TransformBundle::from(bring_to_foreground!(0., 50.)));
+        .insert(LockedAxes::ROTATION_LOCKED)
+
+        .insert(Collider::cuboid(9., 9.))
+        .insert(PLAYER_COLLIDE_WITH_ALL)
+
+        .insert(GravityScale(GRAVITY))
+        .insert(Velocity::zero())
+
+        .insert(TransformBundle::from(bring_to_foreground!(0., 50.)))
+        // .with_children(|parent| {
+        //     parent.spawn(Camera2dBundle::default());
+        // })
+    ;
 }
 
-// applying rotation and movement based on keyboard input
 pub fn player_movement(
     keyboard_input: Res<Input<KeyCode>>,
-    mut query: Query<(&Player, &mut Transform)>,
+    mut players: Query<(&Player, &mut Velocity)>
 ) {
-    let (ship, mut transform) = query.single_mut();
-
-    let mut rotation_factor = 0.0;
-    let mut movement_factor = 0.0;
-
-    if keyboard_input.pressed(KeyCode::Left) {
-        rotation_factor += 1.0;
+    for (player, mut velocity) in players.iter_mut() {
+        if keyboard_input.pressed(KeyCode::A) {
+            velocity.linvel = Vec2::new(-player.movement_speed, velocity.linvel.y);
+        }
+        if keyboard_input.pressed(KeyCode::D) {
+            velocity.linvel = Vec2::new(player.movement_speed, velocity.linvel.y);
+        }
     }
-
-    if keyboard_input.pressed(KeyCode::Right) {
-        rotation_factor -= 1.0;
-    }
-
-    if keyboard_input.pressed(KeyCode::Up) {
-        movement_factor += 1.0;
-    }
-
-    if keyboard_input.pressed(KeyCode::Down) {
-        movement_factor -= 1.0;
-    }
-
-    transform.rotate_z(rotation_factor * ship.rotation_speed * TIME_STEP);
-    let movement_direction = transform.rotation * Vec3::Y;
-    let movement_distance = movement_factor * ship.movement_speed * TIME_STEP;
-    let translation_delta = movement_direction * movement_distance;
-    transform.translation += translation_delta;
-
-    // bound the ship within the invisible level bounds
-    let extents = Vec3::from((BOUNDS / 2.0, Z_FOREGROUND));
-    transform.translation = transform.translation.min(extents).max(-extents);
 }

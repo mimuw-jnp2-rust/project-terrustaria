@@ -2,7 +2,7 @@ use bevy::{math::Vec3Swizzles, prelude::*};
 use bevy_rapier2d::prelude::*;
 
 use crate::constants;
-use constants::{BOUNDS, TIME_STEP, Z_FOREGROUND};
+use constants::{world::{BOUNDS, TIME_STEP}, depth::Z_FOREGROUND};
 
 use crate::helpers::bring_to_foreground;
 

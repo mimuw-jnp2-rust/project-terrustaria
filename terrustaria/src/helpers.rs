@@ -1,6 +1,6 @@
 use bevy::prelude::*;
-use bevy_rapier2d::dynamics::RigidBody;
-use bevy_rapier2d::geometry::Collider;
+use bevy_rapier2d::prelude::*;
+use crate::constants::depth::Z_FOREGROUND;
 
 // a simple camera system for moving and zooming the camera
 // to easily see what is the output of what we create deep down in the mine
@@ -13,19 +13,19 @@ pub fn camera_debug_movement(
     for (mut transform, mut ortho) in query.iter_mut() {
         let mut direction = Vec3::ZERO;
 
-        if keyboard_input.pressed(KeyCode::A) {
+        if keyboard_input.pressed(KeyCode::Left){
             direction -= Vec3::new(1.0, 0.0, 0.0);
         }
 
-        if keyboard_input.pressed(KeyCode::D) {
+        if keyboard_input.pressed(KeyCode::Right) {
             direction += Vec3::new(1.0, 0.0, 0.0);
         }
 
-        if keyboard_input.pressed(KeyCode::W) {
+        if keyboard_input.pressed(KeyCode::Up) {
             direction += Vec3::new(0.0, 1.0, 0.0);
         }
 
-        if keyboard_input.pressed(KeyCode::S) {
+        if keyboard_input.pressed(KeyCode::Down) {
             direction -= Vec3::new(0.0, 1.0, 0.0);
         }
 
@@ -60,7 +60,6 @@ macro_rules! bring_to_foreground {
     };
 }
 
-use crate::constants::Z_FOREGROUND;
 pub(crate) use bring_to_foreground;
 
 #[allow(dead_code)]
@@ -77,4 +76,18 @@ pub fn spawn_big_box_collider(mut commands: Commands) {
             -200.,
             Z_FOREGROUND,
         )));
+}
+
+#[allow(dead_code)]
+pub fn display_events(
+    mut collision_events: EventReader<CollisionEvent>,
+    mut contact_force_events: EventReader<ContactForceEvent>,
+) {
+    for collision_event in collision_events.iter() {
+        println!("Received collision event: {:?}", collision_event);
+    }
+
+    for contact_force_event in contact_force_events.iter() {
+        println!("Received contact force event: {:?}", contact_force_event);
+    }
 }

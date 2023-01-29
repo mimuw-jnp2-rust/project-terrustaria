@@ -49,10 +49,3 @@ pub fn destroy_tile_after_click(
         }
     }
 }
-
-//todo:
-// - limit range what we can destroy
-// - add hold to destroy
-// - add destroy steps
-// - add animation?
-// - add sound?

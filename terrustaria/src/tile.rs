@@ -1,6 +1,6 @@
 use bevy_ecs_tilemap::prelude::*;
 
-use crate::constants::{MAP_SIZE, offsets::*};
+use crate::constants::{map::MAP_SIZE, offsets::*};
 
 
 pub struct TileType {
