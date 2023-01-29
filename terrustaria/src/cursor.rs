@@ -1,20 +1,6 @@
 use bevy::{ecs::system::Resource, prelude::*};
-
-// converts the cursor position into a world position
-// takes into account any transforms applied by the camera
-pub fn cursor_pos_in_world(
-    windows: &Windows,
-    cursor_pos: Vec2,
-    cam_t: &Transform,
-    cam: &Camera,
-) -> Vec3 {
-    let window = windows.primary();
-    let window_size = Vec2::new(window.width(), window.height());
-
-    let ndc_to_world = cam_t.compute_matrix() * cam.projection_matrix().inverse();
-    let ndc = (cursor_pos / window_size) * 2.0 - Vec2::ONE;
-    ndc_to_world.project_point3(ndc.extend(0.0))
-}
+use bevy::render::camera::RenderTarget;
+use crate::player::MainCamera;
 
 #[derive(Resource)]
 pub struct CursorPos(pub(crate) Vec3);
@@ -25,21 +11,40 @@ impl Default for CursorPos {
     }
 }
 
-// we need to keep the cursor position updated based on any `CursorMoved` events
+// update the cursor position resource system
 pub fn update_cursor_pos(
-    windows: Res<Windows>,
-    camera_q: Query<(&Transform, &Camera)>,
-    mut cursor_moved_events: EventReader<CursorMoved>,
+    wnds: Res<Windows>,
+    q_camera: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
     mut cursor_pos: ResMut<CursorPos>,
 ) {
-    for cursor_moved in cursor_moved_events.iter() {
-        for (cam_t, cam) in camera_q.iter() {
-            *cursor_pos = CursorPos(cursor_pos_in_world(
-                &windows,
-                cursor_moved.position,
-                cam_t,
-                cam,
-            ));
-        }
+    // get the camera info and transform
+    // assuming there is exactly one main camera entity, so query::single() is OK
+    let (camera, camera_transform) = q_camera.single();
+
+    // get the window that the camera is displaying to (or the primary window)
+    let wnd = if let RenderTarget::Window(id) = camera.target {
+        wnds.get(id).unwrap()
+    } else {
+        wnds.get_primary().unwrap()
+    };
+
+    // check if the cursor is inside the window and get its position
+    if let Some(screen_pos) = wnd.cursor_position() {
+        // get the size of the window
+        let window_size = Vec2::new(wnd.width() as f32, wnd.height() as f32);
+
+        // convert screen position [0..resolution] to ndc [-1..1] (gpu coordinates)
+        let ndc = (screen_pos / window_size) * 2.0 - Vec2::ONE;
+
+        // matrix for undoing the projection and camera transform
+        let ndc_to_world = camera_transform.compute_matrix() * camera.projection_matrix().inverse();
+
+        // use it to convert ndc to world-space coordinates
+        let world_pos = ndc_to_world.project_point3(ndc.extend(-1.0));
+
+        // reduce it to a 2D value
+        let world_pos: Vec3 = world_pos.truncate().extend(0.);
+
+        *cursor_pos = CursorPos(world_pos);
     }
 }
