@@ -46,7 +46,6 @@ pub fn player_jump_reset(
 
 fn set_jumping_false_if_touching_floor(entity: Entity, jumper: &mut Jumper, event: &CollisionEvent) {
     if let CollisionEvent::Started(h1, h2, ..) = event {
-        println!("denu");
         if *h1 == entity || *h2 == entity {
             jumper.is_jumping = false
         }
@@ -71,16 +70,23 @@ pub fn spawn_player(mut commands: Commands, asset_server: Res<AssetServer>) {
         .insert(RigidBody::Dynamic)
         .insert(LockedAxes::ROTATION_LOCKED)
 
-        .insert(Collider::cuboid(9., 9.))
+        .insert(Collider::cuboid(8., 8.))
         .insert(PLAYER_COLLIDE_WITH_ALL)
 
         .insert(GravityScale(GRAVITY))
         .insert(Velocity::zero())
 
         .insert(TransformBundle::from(bring_to_foreground!(0., 50.)))
-        // .with_children(|parent| {
-        //     parent.spawn(Camera2dBundle::default());
-        // })
+        .with_children(|parent| {
+            parent.spawn(Camera2dBundle {
+                camera: Camera {
+                    // renders before the main camera which has default value: 0
+                    priority: -1,
+                    ..default()
+                },
+                ..default()
+            });
+        })
     ;
 }
 

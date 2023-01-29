@@ -1,4 +1,3 @@
-
 // depth of field constants
 pub mod depth {
     pub const Z_BACKGROUND: f32 = 0.;
@@ -31,7 +30,6 @@ pub mod collision_groups {
         filters: Group::ALL,
     };
 }
-
 
 pub mod world {
     use bevy::math::Vec2;
@@ -68,8 +66,7 @@ pub mod map {
     pub const GRID_SIZE: TilemapGridSize = TilemapGridSize { x: 20., y: 20. };
     pub const COLLIDER_SIZE: Vec2 = Vec2::new(TILE_SIZE.x / 2., TILE_SIZE.y / 2.);
 
-    pub const MAX_CAVE_SIZE: u32 = 100;
-
+    pub const MAX_CAVE_SIZE: u32 = 150;
 
     // counts x and y translation of map, that top middle tile of the map is located in (0.0)
     pub fn map_transform_vec2() -> Vec2 {
