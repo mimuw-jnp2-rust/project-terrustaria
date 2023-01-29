@@ -1,8 +1,10 @@
 use std::thread::sleep;
 use bevy::{prelude::*, math::Vec4Swizzles};
 use bevy_ecs_tilemap::prelude::*;
+use bevy_rapier2d::prelude::Velocity;
 use crate::cursor::CursorPos;
 use crate::map::WithColliders;
+use crate::player::Player;
 
 
 pub fn destroy_tile_after_click(
@@ -16,6 +18,7 @@ pub fn destroy_tile_after_click(
         &Transform,
     ), With<WithColliders>>,
     mut tile_q: Query<&mut TileTextureIndex>,
+    player_q: Query<(&Player, &Velocity)>,
     mouse: Res<Input<MouseButton>>,
 ) {
 
@@ -27,7 +30,12 @@ pub fn destroy_tile_after_click(
             cursor_in_map_pos.xy()
         };
 
-        if !mouse.pressed(MouseButton::Left) {
+        // We have only one player
+        let (_, player_velocity) = player_q.single();
+        let player_moving_fast = player_velocity.linvel.length() > 0.2;
+
+        // Skip when mouse is not pressed and destroy only when player is not moving fast
+        if !mouse.pressed(MouseButton::Left) || player_moving_fast {
             continue;
         }
 
