@@ -14,7 +14,7 @@ pub mod offsets {
     pub const DIAMOND_OFFSET: u32 = 3;
 }
 
-// Group collisions constants
+// group collisions constants
 pub mod collision_groups {
     use bevy_rapier2d::geometry::{CollisionGroups, Group};
 
@@ -33,13 +33,8 @@ pub mod collision_groups {
 }
 
 pub mod world {
-    use bevy::math::Vec2;
-
     pub const GRAVITY: f32 = 3.;
     pub const PHYSICS_SCALE: f32 = 1.;
-
-    pub const TIME_STEP: f32 = 1.0 / 60.0;
-    pub const BOUNDS: Vec2 = Vec2::new(1200.0, 640.0);
 }
 
 pub mod player {

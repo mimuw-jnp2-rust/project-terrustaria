@@ -1,4 +1,4 @@
-use bevy::{prelude::*, time::FixedTimestep};
+use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
 use bevy_inspector_egui::WorldInspectorPlugin;
 use bevy_rapier2d::prelude::*;
@@ -16,9 +16,6 @@ use helpers::{
 
 mod player;
 use player::{player_movement, spawn_player, player_jump, player_jump_reset};
-
-mod npc;
-use npc::{rotate_to_player, snap_to_player, spawn_enemies};
 
 mod cursor;
 use cursor::{update_cursor_pos, CursorPos};
@@ -53,27 +50,13 @@ fn main() {
         .add_startup_system(spawn_foreground_map)
         .add_startup_system_to_stage(StartupStage::PostStartup, spawn_colliders)
         .add_startup_system(spawn_player)
-        .add_startup_system(spawn_enemies)
-        //.add_startup_system(spawn_big_box_collider)
-        // .add_startup_system(setup_camera)
         .add_system(camera_movement)
-        //player systems
+        // player systems
         .add_system(player_jump)
         .add_system(player_jump_reset)
         .add_system(player_movement)
         .add_system(update_cursor_pos)
         .add_system(destroy_tile_after_click)
-        // .add_system(display_events)
-        .add_system_set(
-            SystemSet::new()
-                .with_run_criteria(FixedTimestep::step(TIME_STEP as f64))
-                .with_system(snap_to_player)
-                .with_system(rotate_to_player),
-        )
         .add_system(bevy::window::close_on_esc)
         .run();
-}
-
-fn setup_camera(mut commands: Commands) {
-    commands.spawn(Camera2dBundle::default());
 }

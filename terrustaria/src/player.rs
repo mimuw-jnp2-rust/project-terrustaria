@@ -54,7 +54,7 @@ fn set_jumping_false_if_touching_floor(entity: Entity, jumper: &mut Jumper, even
 }
 
 pub fn spawn_player(mut commands: Commands, asset_server: Res<AssetServer>) {
-    let player_handle: Handle<Image> = asset_server.load("textures/rpg/tiles/generic-rpg-Slice.png");
+    let player_handle: Handle<Image> = asset_server.load("player.png");
     commands
         .spawn((
             SpriteBundle {

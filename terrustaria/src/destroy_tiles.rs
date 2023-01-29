@@ -34,16 +34,16 @@ pub fn destroy_tile_after_click(
             cursor_in_map_pos.xy()
         };
 
-        // We have only one player
+        // we have only one player
         let (_, player_velocity) = player_q.single();
         let player_moving_fast = player_velocity.linvel.length() > 0.2;
 
-        // Skip when mouse is not pressed and destroy only when player is not moving fast
+        // skip when mouse is not pressed and destroy only when player is not moving fast
         if !mouse.pressed(MouseButton::Left) || player_moving_fast {
             continue;
         }
 
-        // Check if player is in range of a tile
+        // check if player is in range of a tile
         let eps_x: f32 = 1.5 * TILE_SIZE.x;
         let eps_y: f32 = 1.5 * TILE_SIZE.y;
         let dif_x: f32 = cursor_in_map_pos.x - player_pos.x - 630.0;
@@ -71,5 +71,3 @@ pub fn destroy_tile_after_click(
         }
     }
 }
-// y: 595-615
-// x: 629
