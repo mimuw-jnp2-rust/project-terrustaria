@@ -4,7 +4,7 @@ use bevy_inspector_egui::WorldInspectorPlugin;
 use bevy_rapier2d::prelude::*;
 
 mod map;
-use map::{spawn_background, spawn_foreground_map, spawn_wall_map, spawn_colliders};
+use map::{spawn_background, spawn_foreground_map, spawn_wall_map, spawn_colliders, spawn_cover_map};
 
 mod constants;
 use constants::world::*;
@@ -27,6 +27,7 @@ mod tile;
 
 mod destroy_tiles;
 use destroy_tiles::destroy_tile_after_click;
+use crate::map::handle_cover;
 
 fn main() {
     App::new()
@@ -51,6 +52,7 @@ fn main() {
         .add_startup_system(spawn_background)
         .add_startup_system(spawn_wall_map)
         .add_startup_system(spawn_foreground_map)
+        .add_startup_system(spawn_cover_map)
         .add_startup_system_to_stage(StartupStage::PostStartup, spawn_colliders)
         .add_startup_system(spawn_player)
         .add_startup_system(spawn_enemies)
@@ -61,6 +63,7 @@ fn main() {
         .add_system(player_jump)
         .add_system(player_jump_reset)
         .add_system(player_movement)
+        .add_system(handle_cover)
         .add_system(update_cursor_pos)
         .add_system(destroy_tile_after_click)
         // .add_system(display_events)

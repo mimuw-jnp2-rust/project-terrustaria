@@ -4,6 +4,7 @@ pub mod depth {
     pub const Z_WALLS: f32 = 0.01;
     pub const Z_FOREGROUND: f32 = 0.02;
     pub const Z_PLAYER: f32 = 0.03;
+    pub const Z_COVER: f32 = 0.04;
 }
 
 // tile offsets for tile_strip.png texture asset
