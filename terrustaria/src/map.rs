@@ -3,14 +3,11 @@ use bevy_ecs_tilemap::prelude::*;
 use bevy_rapier2d::prelude::*;
 use rand::prelude::*;
 
-use crate::constants::{map::*,
-                       depth::*,
-                       collision_groups::MAP_COLLIDE_WITH_ALL_EXCEPT_MAP};
+use crate::constants::{collision_groups::MAP_COLLIDE_WITH_ALL_EXCEPT_MAP, depth::*, map::*};
 use crate::tile::*;
 
 #[derive(Component)]
 pub struct WithColliders;
-
 
 fn random_in_range(range: f32) -> f32 {
     let val: f32 = thread_rng().gen();
@@ -39,7 +36,7 @@ fn get_random_tile_type(tile_types: &TileCollection, pos: &TilePos) -> usize {
 
 fn create_cave(
     tile_types: &TileCollection,
-    visited: &mut Vec<Vec<bool>>,
+    visited: &mut [Vec<bool>],
     start_pos: TilePos,
     mut size: u32,
 ) -> Vec<TilePos> {
@@ -179,10 +176,15 @@ pub fn spawn_colliders(
         for tile_entity in tilemap_storage.iter().flatten() {
             let tile_pos = tile_q.get(*tile_entity).unwrap();
             let transform_bundle = TransformBundle::from(Transform::from_translation(
-                (Vec2::new(tile_pos.x as f32 * GRID_SIZE.x, tile_pos.y as f32 * GRID_SIZE.y) + map_transform_vec2())
-                    .extend(0.)));
+                (Vec2::new(
+                    tile_pos.x as f32 * GRID_SIZE.x,
+                    tile_pos.y as f32 * GRID_SIZE.y,
+                ) + map_transform_vec2())
+                .extend(0.),
+            ));
 
-            commands.entity(*tile_entity)
+            commands
+                .entity(*tile_entity)
                 .insert(RigidBody::Fixed)
                 .insert(Collider::cuboid(COLLIDER_SIZE.x, COLLIDER_SIZE.y))
                 .insert(MAP_COLLIDE_WITH_ALL_EXCEPT_MAP)

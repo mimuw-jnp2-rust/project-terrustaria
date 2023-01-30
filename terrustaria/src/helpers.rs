@@ -11,7 +11,7 @@ pub fn camera_debug_movement(
     for (mut transform, mut ortho) in query.iter_mut() {
         let mut direction = Vec3::ZERO;
 
-        if keyboard_input.pressed(KeyCode::Left){
+        if keyboard_input.pressed(KeyCode::Left) {
             direction -= Vec3::new(1.0, 0.0, 0.0);
         }
 

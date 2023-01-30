@@ -4,18 +4,16 @@ use bevy_inspector_egui::WorldInspectorPlugin;
 use bevy_rapier2d::prelude::*;
 
 mod map;
-use map::{spawn_background, spawn_foreground_map, spawn_wall_map, spawn_colliders};
+use map::{spawn_background, spawn_colliders, spawn_foreground_map, spawn_wall_map};
 
 mod constants;
 use constants::world::*;
 
 mod helpers;
-use helpers::{
-    camera_debug_movement as camera_movement,
-};
+use helpers::camera_debug_movement as camera_movement;
 
 mod player;
-use player::{player_movement, spawn_player, player_jump, player_jump_reset};
+use player::{player_jump, player_jump_reset, player_movement, spawn_player};
 
 mod cursor;
 use cursor::{update_cursor_pos, CursorPos};
@@ -43,7 +41,9 @@ fn main() {
         .init_resource::<CursorPos>()
         .add_plugin(WorldInspectorPlugin::new())
         .add_plugin(TilemapPlugin)
-        .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(PHYSICS_SCALE))
+        .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(
+            PHYSICS_SCALE,
+        ))
         .add_plugin(RapierDebugRenderPlugin::default())
         .add_startup_system(spawn_background)
         .add_startup_system(spawn_wall_map)

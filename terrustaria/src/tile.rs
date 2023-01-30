@@ -2,7 +2,6 @@ use bevy_ecs_tilemap::prelude::*;
 
 use crate::constants::{map::MAP_SIZE, offsets::*};
 
-
 pub struct TileType {
     #[allow(dead_code)]
     name: String,
@@ -48,16 +47,10 @@ impl TileCollection {
         Self {
             types: vec![
                 TileType::new(String::from("Dirt"), 60.0, DIRT_OFFSET, |_, _| true),
-                TileType::new(String::from("Stone"), 10.0, STONE_OFFSET, |_, y| {
-                    y < 12
-                }),
-                TileType::new(String::from("Water"), 10.0, WATER_OFFSET, |_, y| {
-                    y < 20
-                }),
-                TileType::new(String::from("Diamond"), 1., DIAMOND_OFFSET, |_, y| {
-                    y < 12
-                }),
-            ]
+                TileType::new(String::from("Stone"), 10.0, STONE_OFFSET, |_, y| y < 12),
+                TileType::new(String::from("Water"), 10.0, WATER_OFFSET, |_, y| y < 20),
+                TileType::new(String::from("Diamond"), 1., DIAMOND_OFFSET, |_, y| y < 12),
+            ],
         }
     }
 

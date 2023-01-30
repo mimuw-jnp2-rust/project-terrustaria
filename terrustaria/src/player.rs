@@ -2,11 +2,8 @@ use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
 use crate::constants::{
-    player::*,
-    depth::*,
-    collision_groups::PLAYER_COLLIDE_WITH_ALL,
-    world::GRAVITY};
-
+    collision_groups::PLAYER_COLLIDE_WITH_ALL, depth::*, player::*, world::GRAVITY,
+};
 
 #[derive(Component)]
 pub struct Player {
@@ -24,7 +21,7 @@ pub struct Jumper {
 
 pub fn player_jump(
     keyboard_input: Res<Input<KeyCode>>,
-    mut players: Query<(&mut Jumper, &mut Velocity), With<Player>>
+    mut players: Query<(&mut Jumper, &mut Velocity), With<Player>>,
 ) {
     for (mut jumper, mut velocity) in players.iter_mut() {
         if keyboard_input.pressed(KeyCode::Space) && !jumper.is_jumping {
@@ -45,7 +42,11 @@ pub fn player_jump_reset(
     }
 }
 
-fn set_jumping_false_if_touching_floor(entity: Entity, jumper: &mut Jumper, event: &CollisionEvent) {
+fn set_jumping_false_if_touching_floor(
+    entity: Entity,
+    jumper: &mut Jumper,
+    event: &CollisionEvent,
+) {
     if let CollisionEvent::Started(h1, h2, ..) = event {
         if *h1 == entity || *h2 == entity {
             jumper.is_jumping = false
@@ -66,27 +67,25 @@ pub fn spawn_player(mut commands: Commands, asset_server: Res<AssetServer>) {
                 movement_speed: MOVEMENT_SPEED, // metres per second
             },
         ))
-        .insert(Jumper { jump_impulse: JUMP_POWER, is_jumping: false })
+        .insert(Jumper {
+            jump_impulse: JUMP_POWER,
+            is_jumping: false,
+        })
         .insert(Name::new("Player"))
-
         .insert(RigidBody::Dynamic)
         .insert(LockedAxes::ROTATION_LOCKED)
-
         .insert(Collider::cuboid(8., 8.))
         .insert(PLAYER_COLLIDE_WITH_ALL)
-
         .insert(GravityScale(GRAVITY))
         .insert(Velocity::zero())
-
         .with_children(|parent| {
             parent.spawn((Camera2dBundle::new_with_far(100.), MainCamera));
-        })
-    ;
+        });
 }
 
 pub fn player_movement(
     keyboard_input: Res<Input<KeyCode>>,
-    mut players: Query<(&Player, &mut Velocity)>
+    mut players: Query<(&Player, &mut Velocity)>,
 ) {
     for (player, mut velocity) in players.iter_mut() {
         if keyboard_input.pressed(KeyCode::A) {
