@@ -4,6 +4,7 @@ pub mod depth {
     pub const Z_WALLS: f32 = 0.01;
     pub const Z_FOREGROUND: f32 = 0.02;
     pub const Z_PLAYER: f32 = 0.03;
+    pub const Z_COVER: f32 = 0.04;
 }
 
 // tile offsets for tile_strip.png texture asset
@@ -40,6 +41,7 @@ pub mod world {
 pub mod player {
     pub const JUMP_POWER: f32 = 120.;
     pub const MOVEMENT_SPEED: f32 = 100.;
+    pub const VISION_RADIUS: u32 = 8;    // tiles seen in each direction
 }
 
 // map constants

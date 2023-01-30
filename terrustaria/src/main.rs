@@ -7,6 +7,7 @@ use bevy_inspector_egui::WorldInspectorPlugin;
 
 mod map;
 use map::{spawn_background, spawn_colliders, spawn_foreground_map, spawn_wall_map};
+use map::{handle_cover, spawn_cover_map};
 
 mod constants;
 use constants::world::*;
@@ -48,6 +49,7 @@ fn main() {
         .add_startup_system(spawn_background)
         .add_startup_system(spawn_wall_map)
         .add_startup_system(spawn_foreground_map)
+        .add_startup_system(spawn_cover_map)
         .add_startup_system_to_stage(StartupStage::PostStartup, spawn_colliders)
         .add_startup_system(spawn_player)
         .add_system(camera_movement)
@@ -55,6 +57,7 @@ fn main() {
         .add_system(player_jump)
         .add_system(player_jump_reset)
         .add_system(player_movement)
+        .add_system(handle_cover)
         .add_system(update_cursor_pos)
         .add_system(destroy_tile_after_click)
         .add_system(bevy::window::close_on_esc);

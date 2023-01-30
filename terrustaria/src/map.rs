@@ -3,11 +3,19 @@ use bevy_ecs_tilemap::prelude::*;
 use bevy_rapier2d::prelude::*;
 use rand::prelude::*;
 
-use crate::constants::{collision_groups::MAP_COLLIDE_WITH_ALL_EXCEPT_MAP, depth::*, map::*};
+use crate::constants::{map::*,
+                       depth::*,
+                       player::VISION_RADIUS,
+                       collision_groups::MAP_COLLIDE_WITH_ALL_EXCEPT_MAP};
+use crate::player::Player;
 use crate::tile::*;
 
 #[derive(Component)]
 pub struct WithColliders;
+#[derive(Component)]
+pub struct CoverTile;
+#[derive(Component)]
+pub struct CoverMap;
 
 fn random_in_range(range: f32) -> f32 {
     let val: f32 = thread_rng().gen();
@@ -167,6 +175,36 @@ fn fill_tilemap_randomly(
     }
 }
 
+
+fn fill_cover_map(
+    texture_index: TileTextureIndex,
+    tilemap_id: TilemapId,
+    commands: &mut Commands,
+    tile_storage: &mut TileStorage,
+    map_name: &str,
+) {
+    for x in 0..MAP_SIZE.x {
+        for y in 0..MAP_SIZE.y - BUILDING_HEIGHT {
+            let covered = y < MAP_SIZE.y - BUILDING_HEIGHT - VISION_RADIUS
+                || x <= MAP_SIZE.x / 2 - VISION_RADIUS || x >= MAP_SIZE.x / 2 + VISION_RADIUS;
+            let tile_pos = TilePos { x, y };
+            let tile_entity = commands
+                .spawn(TileBundle {
+                    position: tile_pos,
+                    tilemap_id,
+                    texture_index,
+                    ..Default::default()
+                })
+                .insert(Name::new(format!("{map_name}Tile({x},{y})")))
+                .insert(CoverTile)
+                .insert(TileVisible(covered))
+                .insert(Transform::default())
+                .id();
+            tile_storage.set(&tile_pos, tile_entity);
+        }
+    }
+}
+
 pub fn spawn_colliders(
     mut commands: Commands,
     tilemap_q: Query<&TileStorage, With<WithColliders>>,
@@ -224,6 +262,16 @@ fn spawn_map(
             &mut tile_storage,
             map_name,
         );
+    } else if map_name == "Cover" {
+        texture_handle = asset_server.load("tiles_big.png");
+        commands.entity(tilemap_entity).insert(CoverMap);
+        fill_cover_map(
+            TileTextureIndex(4),
+            TilemapId(tilemap_entity),
+            &mut commands,
+            &mut tile_storage,
+            map_name,
+        );
     }
 
     commands.entity(tilemap_entity).insert(TilemapBundle {
@@ -256,4 +304,44 @@ pub fn spawn_wall_map(commands: Commands, asset_server: Res<AssetServer>) {
 
 pub fn spawn_foreground_map(commands: Commands, asset_server: Res<AssetServer>) {
     spawn_map(commands, asset_server, Z_FOREGROUND, "Foreground");
+}
+
+pub fn spawn_cover_map(commands: Commands, asset_server: Res<AssetServer>) {
+    spawn_map(commands, asset_server, Z_COVER, "Cover");
+}
+
+pub fn handle_cover(
+    player_q : Query<&Transform, &Player>,
+    mut cover_q : Query<&mut TileVisible, With<CoverTile>>,
+    tilemap_q: Query<(
+        &TilemapSize,
+        &TilemapGridSize,
+        &TilemapType,
+        &TileStorage,
+    ), With<CoverMap>>,
+) {
+    let player_transform = player_q.single().translation;
+    let mut player_pos = Vec2::new(player_transform.x, player_transform.y);
+    player_pos = Vec2::new(player_pos.x - map_transform_vec2().x, player_pos.y - map_transform_vec2().y);
+    let (map_size, grid_size, map_type, tile_storage) = tilemap_q.single();
+
+    let mut possible_tile_pos: Vec<Option<TilePos>> = Vec::new();
+    let radius = VISION_RADIUS as f32;
+    let horizontal_range = [player_pos.x - TILE_SIZE.x * radius, player_pos.x + TILE_SIZE.x * radius];
+    let vertical_range = [player_pos.y - TILE_SIZE.y * radius, player_pos.y + TILE_SIZE.y * radius];
+
+    for ix in ((horizontal_range[0] as i32)..(horizontal_range[1] as i32)).step_by(TILE_SIZE.x as usize) {
+        for iy in ((vertical_range[0] as i32)..(vertical_range[1] as i32)).step_by(TILE_SIZE.y as usize) {
+            let possible_pos = Vec2::new(ix as f32, iy as f32);
+            possible_tile_pos.push(TilePos::from_world_pos(&possible_pos, map_size, grid_size, map_type));
+        }
+    }
+
+    for pos_pos in possible_tile_pos.into_iter().flatten() {
+        if let Some(tile_entity) = tile_storage.get(&pos_pos) {
+            if let Ok(mut tile_vis) = cover_q.get_mut(tile_entity) {
+                tile_vis.0 = false;
+            }
+        }
+    }
 }
