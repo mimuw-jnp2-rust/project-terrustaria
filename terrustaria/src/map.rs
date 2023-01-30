@@ -3,10 +3,9 @@ use bevy_ecs_tilemap::prelude::*;
 use bevy_rapier2d::prelude::*;
 use rand::prelude::*;
 
-use crate::constants::{map::*,
-                       depth::*,
-                       player::VISION_RADIUS,
-                       collision_groups::MAP_COLLIDE_WITH_ALL_EXCEPT_MAP};
+use crate::constants::{
+    collision_groups::MAP_COLLIDE_WITH_ALL_EXCEPT_MAP, depth::*, map::*, player::VISION_RADIUS,
+};
 use crate::player::Player;
 use crate::tile::*;
 
@@ -175,7 +174,6 @@ fn fill_tilemap_randomly(
     }
 }
 
-
 fn fill_cover_map(
     texture_index: TileTextureIndex,
     tilemap_id: TilemapId,
@@ -186,7 +184,8 @@ fn fill_cover_map(
     for x in 0..MAP_SIZE.x {
         for y in 0..MAP_SIZE.y - BUILDING_HEIGHT {
             let covered = y < MAP_SIZE.y - BUILDING_HEIGHT - VISION_RADIUS
-                || x <= MAP_SIZE.x / 2 - VISION_RADIUS || x >= MAP_SIZE.x / 2 + VISION_RADIUS;
+                || x <= MAP_SIZE.x / 2 - VISION_RADIUS
+                || x >= MAP_SIZE.x / 2 + VISION_RADIUS;
             let tile_pos = TilePos { x, y };
             let tile_entity = commands
                 .spawn(TileBundle {
@@ -311,29 +310,42 @@ pub fn spawn_cover_map(commands: Commands, asset_server: Res<AssetServer>) {
 }
 
 pub fn handle_cover(
-    player_q : Query<&Transform, &Player>,
-    mut cover_q : Query<&mut TileVisible, With<CoverTile>>,
-    tilemap_q: Query<(
-        &TilemapSize,
-        &TilemapGridSize,
-        &TilemapType,
-        &TileStorage,
-    ), With<CoverMap>>,
+    player_q: Query<&Transform, &Player>,
+    mut cover_q: Query<&mut TileVisible, With<CoverTile>>,
+    tilemap_q: Query<(&TilemapSize, &TilemapGridSize, &TilemapType, &TileStorage), With<CoverMap>>,
 ) {
     let player_transform = player_q.single().translation;
     let mut player_pos = Vec2::new(player_transform.x, player_transform.y);
-    player_pos = Vec2::new(player_pos.x - map_transform_vec2().x, player_pos.y - map_transform_vec2().y);
+    player_pos = Vec2::new(
+        player_pos.x - map_transform_vec2().x,
+        player_pos.y - map_transform_vec2().y,
+    );
     let (map_size, grid_size, map_type, tile_storage) = tilemap_q.single();
 
     let mut possible_tile_pos: Vec<Option<TilePos>> = Vec::new();
     let radius = VISION_RADIUS as f32;
-    let horizontal_range = [player_pos.x - TILE_SIZE.x * radius, player_pos.x + TILE_SIZE.x * radius];
-    let vertical_range = [player_pos.y - TILE_SIZE.y * radius, player_pos.y + TILE_SIZE.y * radius];
+    let horizontal_range = [
+        player_pos.x - TILE_SIZE.x * radius,
+        player_pos.x + TILE_SIZE.x * radius,
+    ];
+    let vertical_range = [
+        player_pos.y - TILE_SIZE.y * radius,
+        player_pos.y + TILE_SIZE.y * radius,
+    ];
 
-    for ix in ((horizontal_range[0] as i32)..(horizontal_range[1] as i32)).step_by(TILE_SIZE.x as usize) {
-        for iy in ((vertical_range[0] as i32)..(vertical_range[1] as i32)).step_by(TILE_SIZE.y as usize) {
+    for ix in
+        ((horizontal_range[0] as i32)..(horizontal_range[1] as i32)).step_by(TILE_SIZE.x as usize)
+    {
+        for iy in
+            ((vertical_range[0] as i32)..(vertical_range[1] as i32)).step_by(TILE_SIZE.y as usize)
+        {
             let possible_pos = Vec2::new(ix as f32, iy as f32);
-            possible_tile_pos.push(TilePos::from_world_pos(&possible_pos, map_size, grid_size, map_type));
+            possible_tile_pos.push(TilePos::from_world_pos(
+                &possible_pos,
+                map_size,
+                grid_size,
+                map_type,
+            ));
         }
     }
 

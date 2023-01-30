@@ -57,7 +57,7 @@ Second part:
   - now we can move left, right
   - using space we can jump!
 - camera follows the player
-
+- tiles are initially covered, player uncover tiles by moving in their direction
 
 
 ### How to run the game

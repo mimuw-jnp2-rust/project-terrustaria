@@ -41,7 +41,7 @@ pub mod world {
 pub mod player {
     pub const JUMP_POWER: f32 = 120.;
     pub const MOVEMENT_SPEED: f32 = 100.;
-    pub const VISION_RADIUS: u32 = 8;    // tiles seen in each direction
+    pub const VISION_RADIUS: u32 = 8; // tiles seen in each direction
 }
 
 // map constants
