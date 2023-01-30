@@ -49,7 +49,7 @@ pub mod map {
         TilePos, TilemapGridSize, TilemapSize, TilemapTileSize, TilemapType,
     };
 
-    const MAP_WIDTH: u32 = 64;
+    const MAP_WIDTH: u32 = 150;
     const MAP_DEPTH: u32 = 32;
     pub const BUILDING_HEIGHT: u32 = 15;
     pub const MAP_SIZE: TilemapSize = TilemapSize {

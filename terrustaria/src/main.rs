@@ -44,7 +44,7 @@ fn main() {
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(
             PHYSICS_SCALE,
         ))
-        .add_plugin(RapierDebugRenderPlugin::default())
+        // .add_plugin(RapierDebugRenderPlugin::default())
         .add_startup_system(spawn_background)
         .add_startup_system(spawn_wall_map)
         .add_startup_system(spawn_foreground_map)

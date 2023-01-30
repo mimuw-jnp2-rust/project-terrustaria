@@ -1,4 +1,4 @@
-use crate::constants::map::TILE_SIZE;
+use crate::constants::map::{map_transform_vec2, TILE_SIZE};
 use crate::cursor::CursorPos;
 use crate::map::WithColliders;
 use crate::player::Player;
@@ -47,8 +47,8 @@ pub fn destroy_tile_after_click(
         // check if player is in range of a tile
         let eps_x: f32 = 1.5 * TILE_SIZE.x;
         let eps_y: f32 = 1.5 * TILE_SIZE.y;
-        let dif_x: f32 = cursor_in_map_pos.x - player_pos.x - 630.0;
-        let dif_y: f32 = cursor_in_map_pos.y - player_pos.y - 620.0;
+        let dif_x: f32 = cursor_in_map_pos.x - player_pos.x + map_transform_vec2().x;
+        let dif_y: f32 = cursor_in_map_pos.y - player_pos.y + map_transform_vec2().y;
         if dif_x.abs() > eps_x || dif_y.abs() > eps_y {
             continue;
         }

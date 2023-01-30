@@ -43,3 +43,26 @@ Second part:
 - player is able to mine now - we managed to implement highlighting the tiles, the next steps are: highlight them in range of a player, and destroy tiles that are in the range of the player.
 
 - After launching the game, using arrows you can steer our cool player, and using WASD, Z, X you can view the map (option for debug). Right now colliders projection can be seen, this is also a debug option.
+
+## What we realized in the second part:
+- improved map randomization
+  - improved algorithm
+  - added caves generator
+- fixed colliders - they have proper size now and work almost as intended
+- changed graphics - we changed the graphics to be more similar to the original game
+- destructing the blocks
+  - with animation
+  - within player range
+- implemented intended player movement
+  - now we can move left, right
+  - using space we can jump!
+- camera follows the player
+
+
+
+### How to run the game
+- Just **cargo run**
+- Now to steer our even cooler player use **A, D, SPACE** 
+- We left 2 debug options:
+  - [commented in main] colliders projection can be seen
+  - [commented in main] camera movement with Arrows and Z,X for zoom 
