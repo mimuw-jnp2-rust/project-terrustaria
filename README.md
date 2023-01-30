@@ -62,6 +62,8 @@ Second part:
 
 ### How to run the game
 - Just **cargo run**
+- In case you need debug information: `cargo build --features "debug" && cargo run --features "debug"`.
+  Note that it may lead to decrease in app's performance.
 - Now to steer our even cooler player use **A, D, SPACE** 
 - We left 2 debug options:
   - [commented in main] colliders projection can be seen

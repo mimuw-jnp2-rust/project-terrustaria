@@ -1,7 +1,9 @@
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
-use bevy_inspector_egui::WorldInspectorPlugin;
 use bevy_rapier2d::prelude::*;
+
+#[cfg(feature = "debug")]
+use bevy_inspector_egui::WorldInspectorPlugin;
 
 mod map;
 use map::{spawn_background, spawn_colliders, spawn_foreground_map, spawn_wall_map};
@@ -24,8 +26,8 @@ mod destroy_tiles;
 use destroy_tiles::destroy_tile_after_click;
 
 fn main() {
-    App::new()
-        .add_plugins(
+    let mut app = App::new();
+    app.add_plugins(
             DefaultPlugins
                 .set(WindowPlugin {
                     window: WindowDescriptor {
@@ -39,12 +41,10 @@ fn main() {
                 .set(ImagePlugin::default_nearest()),
         )
         .init_resource::<CursorPos>()
-        .add_plugin(WorldInspectorPlugin::new())
         .add_plugin(TilemapPlugin)
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(
             PHYSICS_SCALE,
         ))
-        // .add_plugin(RapierDebugRenderPlugin::default())
         .add_startup_system(spawn_background)
         .add_startup_system(spawn_wall_map)
         .add_startup_system(spawn_foreground_map)
@@ -57,6 +57,11 @@ fn main() {
         .add_system(player_movement)
         .add_system(update_cursor_pos)
         .add_system(destroy_tile_after_click)
-        .add_system(bevy::window::close_on_esc)
-        .run();
+        .add_system(bevy::window::close_on_esc);
+
+    #[cfg(feature = "debug")]
+    app.add_plugin(WorldInspectorPlugin::new())
+        .add_plugin(RapierDebugRenderPlugin::default());
+
+    app.run();
 }
